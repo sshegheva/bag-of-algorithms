@@ -60,3 +60,4 @@ target/
 
 # do not commit data
 data/*
+.ipynb_checkpoints

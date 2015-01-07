@@ -7,6 +7,7 @@ from algorithms import LOGGER
 class DecisionTree:
     def __init__(self):
         features, weights, labels = load_higgs_train()
+        self.feature_names = features.columns.tolist()
         self.clf = tree.DecisionTreeClassifier()
         self.predictions = None
         self.score = None

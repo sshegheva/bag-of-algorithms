@@ -18,13 +18,24 @@ from algorithms import TEST_DATA, TRAINING_DATA, LOGGER
 
 
 def load_higgs_train():
+    """
+    Load higgs dataset
+
+    do some data cleanup:
+    - remove data entries (anomalies) which are outside of normal range
+    - pick only derived feature
+    :return: dataframe
+    """
     df = pd.read_csv(TRAINING_DATA)
     df = df.replace(-999.000, np.nan).dropna()
+    df.set_index('EventId', inplace=True)
     LOGGER.info('Loaded higgs training dataset of size %s', len(df))
     columns = df.columns
-    features = df[columns[:-2]]
-    weights = df[columns[-2]]
-    labels = df[columns[-1]]
+    derived_features_names = [f for f in columns if f.startswith('DER')]
+    derived_df = df[derived_features_names]
+    features = derived_df[derived_features_names]
+    weights = df['Weight']
+    labels = df['Label']
     return features, weights, labels
 
 

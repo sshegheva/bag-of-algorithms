@@ -1,4 +1,4 @@
 #!/bin/bash
-export PYTHONPATH=/Users/maestro/schoolspace/bag-of-algorithms
+export PYTHONPATH=/Users/sshegheva/workspace/bag-of-algorithms
 cd ../analysis/notebooks
 ipython notebook

@@ -49,13 +49,19 @@ def run_decision_tree(min_samples_split=40):
 
 
 def estimate_best_min_samples_split():
-    min_split_range = xrange(2, 100, 2)
+    """
+    Run the decision tree classifier with multiple settings of
+    min_sample_split and plot the accuracy function of min_sample_split
+    :return: the best min_sample_split setting
+    """
+    min_split_range = xrange(2, 120, 2)
     data = {min_sample: run_decision_tree(min_sample) for min_sample in min_split_range}
     LOGGER.info('Performed evaluation of the min sample split choice')
     df = pd.DataFrame.from_dict(data, orient='index').sort(ascending=False).reset_index()
     df = df.rename(columns={0: 'accuracy score', 'index': 'min_sample_split'}).set_index('min_sample_split')
     LOGGER.info(df)
     # plot the accuracy curve
-    df.plot(title='Accuracy change as a function of min_samples_split', kind='density')
+    df.plot(title='Accuracy change as a function of min_samples_split')
+    pd.rolling_mean(df, 5).plot(title='Accuracy change as a function of min_samples_split (smoothed)')
 
 

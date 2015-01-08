@@ -6,12 +6,13 @@ from algorithms import LOGGER
 
 
 class DecisionTree:
-    def __init__(self, min_samples_split=40):
+    def __init__(self, min_samples_split=40, max_depth=None):
         features, weights, labels = load_higgs_train()
         self.feature_names = features.columns.tolist()
         self.min_samples_split = min_samples_split
+        self.max_depth = max_depth
         self.clf = tree.DecisionTreeClassifier(min_samples_split=self.min_samples_split)
-        LOGGER.info('Created classifier with min_samples_split = %s', self.min_samples_split)
+        LOGGER.info('Created classifier with min_samples_split = %s and max depth %s', self.min_samples_split, self.max_depth)
         self.training_results, self.predictions = None, None
         self.training_score, self.test_score = None, None
         self.features_train, self.features_test, self.labels_train, self.labels_test = split_dataset(features, labels)
@@ -40,11 +41,11 @@ class DecisionTree:
         LOGGER.info('Test Accuracy score = %s', self.test_score)
 
 
-def run_decision_tree(min_samples_split=40):
+def run_decision_tree(min_samples_split=40, max_depth=None):
     """
     Run and evaluate decision trees with default settings
     """
-    dt = DecisionTree(min_samples_split)
+    dt = DecisionTree(min_samples_split=min_samples_split, max_depth=max_depth)
     dt.train()
     dt.predict()
     dt.evaluate()
@@ -58,15 +59,34 @@ def estimate_best_min_samples_split():
     :return: the best min_sample_split setting
     """
     min_split_range = xrange(2, 120, 2)
-    data = [[min_sample] + list(run_decision_tree(min_sample)) for min_sample in min_split_range]
+    data = [[min_sample] + list(run_decision_tree(min_samples_split=min_sample)) for min_sample in min_split_range]
     LOGGER.info('Performed evaluation of the min sample split choice')
-    columns = ['min_sample_split', 'training score', 'test score']
+    columns = ['min_sample_split', 'training_score', 'test_score']
     df = pd.DataFrame.from_records(data, columns=columns, index=columns[0])
     LOGGER.info(df)
     # plot the accuracy curve
-    df['error'] = (df['training score'] - df['test score']) * (df['training score'] - df['test score'])
+    df['error'] = (df['training_score'] - df['test_score']) * (df['training_score'] - df['test_score'])
     smooth_df = pd.rolling_mean(df, 5)
-    smooth_df = smooth_df[['training score', 'test score']]
+    smooth_df = smooth_df[['training_score', 'test_score']]
     smooth_df.plot(title='Accuracy change as a function of min_samples_split (smoothed)')
+
+
+def estimate_best_max_depth():
+    """
+    Run the decision tree classifier with multiple settings of
+    max depth and plot the accuracy function of max depth
+    :return: the best max depth setting
+    """
+    max_depth_range = xrange(2, 120, 2)
+    data = [[depth] + list(run_decision_tree(max_depth=depth)) for depth in max_depth_range]
+    LOGGER.info('Performed evaluation of the max death')
+    columns = ['max_depth', 'training_score', 'test_score']
+    df = pd.DataFrame.from_records(data, columns=columns, index=columns[0])
+    LOGGER.info(df)
+    # plot the accuracy curve
+    df['error'] = (df['training_score'] - df['test score']) * (df['training_score'] - df['test_score'])
+    smooth_df = pd.rolling_mean(df, 5)
+    smooth_df = smooth_df[['training_score', 'test_score']]
+    smooth_df.plot(title='Accuracy change as a function of max depth (smoothed)')
 
 

@@ -64,8 +64,11 @@ def estimate_best_min_samples_split():
     columns = ['min_sample_split', 'training_score', 'test_score']
     df = pd.DataFrame.from_records(data, columns=columns, index=columns[0])
     LOGGER.info(df)
-    # plot the accuracy curve
     df['error'] = (df['training_score'] - df['test_score']) * (df['training_score'] - df['test_score'])
+    return df
+
+
+def plot_accuracy_function(df):
     smooth_df = pd.rolling_mean(df, 5)
     smooth_df = smooth_df[['training_score', 'test_score']]
     smooth_df.plot(title='Accuracy change as a function of min_samples_split (smoothed)')
@@ -85,8 +88,6 @@ def estimate_best_max_depth():
     LOGGER.info(df)
     # plot the accuracy curve
     df['error'] = (df['training_score'] - df['test_score']) * (df['training_score'] - df['test_score'])
-    smooth_df = pd.rolling_mean(df, 5)
-    smooth_df = smooth_df[['training_score', 'test_score']]
-    smooth_df.plot(title='Accuracy change as a function of max depth (smoothed)')
+    return df
 
 

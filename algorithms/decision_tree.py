@@ -6,8 +6,8 @@ from algorithms import LOGGER
 
 
 class DecisionTree:
-    def __init__(self, min_samples_split=40, max_depth=None):
-        features, weights, labels = load_higgs_train()
+    def __init__(self, data, min_samples_split=40, max_depth=None):
+        features, weights, labels = data
         self.feature_names = features.columns.tolist()
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
@@ -41,11 +41,11 @@ class DecisionTree:
         LOGGER.info('Test Accuracy score = %s', self.test_score)
 
 
-def run_decision_tree(min_samples_split=40, max_depth=None):
+def run_decision_tree(data, min_samples_split=40, max_depth=None):
     """
     Run and evaluate decision trees with default settings
     """
-    dt = DecisionTree(min_samples_split=min_samples_split, max_depth=max_depth)
+    dt = DecisionTree(data=data, min_samples_split=min_samples_split, max_depth=max_depth)
     dt.train()
     dt.predict()
     dt.evaluate()
@@ -59,10 +59,11 @@ def estimate_best_min_samples_split():
     :return: the best min_sample_split setting
     """
     min_split_range = xrange(2, 120, 2)
-    data = [[min_sample] + list(run_decision_tree(min_samples_split=min_sample)) for min_sample in min_split_range]
+    data = load_higgs_train()
+    records = [[min_sample] + list(run_decision_tree(data=data, min_samples_split=min_sample)) for min_sample in min_split_range]
     LOGGER.info('Performed evaluation of the min sample split choice')
     columns = ['min_sample_split', 'training_score', 'test_score']
-    df = pd.DataFrame.from_records(data, columns=columns, index=columns[0])
+    df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
     LOGGER.info(df)
     df['error'] = (df['training_score'] - df['test_score']) * (df['training_score'] - df['test_score'])
     return df
@@ -81,10 +82,11 @@ def estimate_best_max_depth():
     :return: the best max depth setting
     """
     max_depth_range = xrange(2, 120, 2)
-    data = [[depth] + list(run_decision_tree(max_depth=depth)) for depth in max_depth_range]
+    data = load_higgs_train()
+    records = [[depth] + list(run_decision_tree(data=data, max_depth=depth)) for depth in max_depth_range]
     LOGGER.info('Performed evaluation of the max death')
     columns = ['max_depth', 'training_score', 'test_score']
-    df = pd.DataFrame.from_records(data, columns=columns, index=columns[0])
+    df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
     LOGGER.info(df)
     # plot the accuracy curve
     df['error'] = (df['training_score'] - df['test_score']) * (df['training_score'] - df['test_score'])

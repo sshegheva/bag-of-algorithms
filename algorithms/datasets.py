@@ -45,5 +45,5 @@ def load_higgs_test():
     return df
 
 
-def split_dataset(features, labels):
-    return train_test_split(features, labels, test_size=0.33)
+def split_dataset(features, weights, labels):
+    return train_test_split(features, weights, labels, test_size=0.33)

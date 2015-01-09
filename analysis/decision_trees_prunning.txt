@@ -1,0 +1,9 @@
+1. Grow the whole tree without constraints
+2. Check the scores , error etc
+3. Now visualize the tree with pydot and see which has least information gain. Find the # of samples in that box.
+4. Now use that # of samples plus 1 as min_samples_split as parameters for new model and check the score.
+
+Instead of 3 and 4 , we can do a grid search with different values of min_samples_split and check that score against step 2.
+If this score was better than 2 , then pruning helped the model.
+(I used min_samples_leaf instead of min_samples_split in my earlier reply, which was confusing sorry).
+It's seems like an indirect method of pruning. I could think of only this being the easiest way to indirectly prune in sklearn.

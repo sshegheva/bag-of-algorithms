@@ -1,5 +1,11 @@
 import os
 import logging
+import pandas as pd
+
+pd.set_option('display.max_columns', 15)
+pd.set_option('display.line_width', 400)
+pd.set_option('display.mpl_style', 'default')
+
 
 def create_dir(path):
     if not os.path.exists(path):

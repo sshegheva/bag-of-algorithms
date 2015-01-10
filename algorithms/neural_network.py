@@ -32,26 +32,33 @@ class NeuralNetwork:
         LOGGER.info("Input and output dimensions: %s, %s", self.trndata.indim, self.trndata.outdim)
 
     def _create_trainer(self):
-        fnn = buildNetwork(self.trndata.indim, 5, self.trndata.outdim, outclass=SoftmaxLayer)
-        self.trainer = BackpropTrainer(fnn, dataset=self.trndata, momentum=0.1, verbose=True, weightdecay=0.01)
+        self.fnn = buildNetwork(self.trndata.indim, 5, self.trndata.outdim, outclass=SoftmaxLayer)
+        self.trainer = BackpropTrainer(self.fnn, dataset=self.trndata, momentum=0.1, verbose=True, weightdecay=0.01)
 
     def train(self, train_epoch):
         self.trainer.trainEpochs(train_epoch)
+
+    def predict(self, dataset):
+        return self.fnn.activateOnDataset(dataset)
 
     def estimate_error(self):
         trnerror = percentError(self.trainer.testOnClassData(), self.trndata['class'])
         tsterror = percentError(self.trainer.testOnClassData(dataset=self.tstdata), self.tstdata['class'])
         LOGGER.info("epoch: %4d", self.trainer.totalepochs)
-        LOGGER.info("train error: %5.2f%%", trnerror)
-        LOGGER.info("test error: %5.2f%%", tsterror)
+        LOGGER.info("train error: %5.4f", trnerror)
+        LOGGER.info("test error: %5.4f", tsterror)
         return self.trainer.totalepochs, trnerror, tsterror
 
     def estimate_accuracy(self):
-        trnaccuracy = Validator.classificationPerformance(self.trndata['input'], self.trndata['target'])
-        tstaccuracy = Validator.classificationPerformance(self.tstdata['input'], self.tstdata['target'])
-        LOGGER.info("train error: %5.2f%%", trnaccuracy)
-        LOGGER.info("test error: %5.2f%%", tstaccuracy)
+        training_predictions = self.predict(self.trndata)
+        test_predictions = self.predict(self.tstdata)
+        trnaccuracy = Validator.classificationPerformance(training_predictions, self.trndata['target'])
+        tstaccuracy = Validator.classificationPerformance(test_predictions, self.tstdata['target'])
+        LOGGER.info("train accuracy: %5.4f", trnaccuracy)
+        LOGGER.info("test accuracy: %5.4f", tstaccuracy)
         return self.trainer.totalepochs, trnaccuracy, tstaccuracy
+
+
 
 
 def estimate_training_iterations():
@@ -60,7 +67,7 @@ def estimate_training_iterations():
     error_data = []
     accuracy_data = []
     for i in range(20):
-        nn.train(train_epoch=i)
+        nn.train(train_epoch=1)
         total_epochs, trnerror, tsterror = nn.estimate_error()
         total_epochs, trnaccuracy, tstaccuracy = nn.estimate_accuracy()
         error_data.append([total_epochs, trnerror, tsterror])

@@ -98,12 +98,10 @@ def estimate_best_c():
     return df
 
 
-def grid_search_best_parameter(data, sample_size=0.1):
-    sample_size = int(sample_size * len(data))
-    rows = random.sample(data.index, sample_size)
-    sampled_data = data.ix[rows]
-    LOGGER.info('Samples %f%% of the data: from original %s to sampled %s', sample_size * 100, len(data), len(sampled_data))
-    trnfeatures, tstfeatures, trnweights, tstweights, trnlabels, tstlabels = split_dataset(**sampled_data)
+def grid_search_best_parameter(data):
+    features, weights, labels = data
+    labels = np.array([1 if l == 'b' else 0 for l in labels])
+    trnfeatures, tstfeatures, trnweights, tstweights, trnlabels, tstlabels = split_dataset(features, weights, labels)
     # Set the parameters by cross-validation
     tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4], 'C': [1, 10, 100, 1000]}]
 

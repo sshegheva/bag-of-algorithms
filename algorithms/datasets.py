@@ -17,7 +17,7 @@ from sklearn.cross_validation import train_test_split
 from algorithms import TEST_DATA, TRAINING_DATA, LOGGER
 
 
-def load_higgs_train():
+def load_higgs_train(sample_size=None):
     """
     Load higgs dataset
 
@@ -26,7 +26,7 @@ def load_higgs_train():
     - pick only derived feature
     :return: dataframe
     """
-    df = pd.read_csv(TRAINING_DATA)
+    df = pd.read_csv(TRAINING_DATA, nrows=sample_size)
     df = df.replace(-999.000, np.nan).dropna()
     df.set_index('EventId', inplace=True)
     LOGGER.info('Loaded higgs training dataset of size %s', len(df))

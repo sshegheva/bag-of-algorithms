@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from pybrain.datasets import ClassificationDataSet
 from pybrain.utilities import percentError
+from pybrain.tools.validation import Validator
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.structure.modules import SoftmaxLayer
@@ -37,28 +38,39 @@ class NeuralNetwork:
     def train(self, train_epoch):
         self.trainer.trainEpochs(train_epoch)
 
-    def evaluate(self):
-        trnerror = percentError(self.trainer.testOnClassData(), self.trndata['class'] )
-        tsterror = percentError(self.trainer.testOnClassData(dataset=self.tstdata), self.tstdata['class'] )
+    def estimate_error(self):
+        trnerror = percentError(self.trainer.testOnClassData(), self.trndata['class'])
+        tsterror = percentError(self.trainer.testOnClassData(dataset=self.tstdata), self.tstdata['class'])
         LOGGER.info("epoch: %4d", self.trainer.totalepochs)
         LOGGER.info("train error: %5.2f%%", trnerror)
         LOGGER.info("test error: %5.2f%%", tsterror)
         return self.trainer.totalepochs, trnerror, tsterror
+
+    def estimate_accuracy(self):
+        trnaccuracy = Validator.classificationPerformance(self.trndata['input'], self.trndata['target'])
+        tstaccuracy = Validator.classificationPerformance(self.tstdata['input'], self.tstdata['target'])
+        LOGGER.info("train error: %5.2f%%", trnaccuracy)
+        LOGGER.info("test error: %5.2f%%", tstaccuracy)
+        return self.trainer.totalepochs, trnaccuracy, tstaccuracy
 
 
 def estimate_training_iterations():
     data = load_higgs_train()
     nn = NeuralNetwork(data)
     error_data = []
+    accuracy_data = []
     for i in range(20):
         nn.train(train_epoch=i)
-        total_epochs, trnerror, tsterror = nn.evaluate()
+        total_epochs, trnerror, tsterror = nn.estimate_error()
+        total_epochs, trnaccuracy, tstaccuracy = nn.estimate_accuracy()
         error_data.append([total_epochs, trnerror, tsterror])
-    df = pd.DataFrame.from_records(error_data, columns=['iteration', 'training_error', 'test_error'])
-    return df
+        accuracy_data.append([total_epochs, trnaccuracy, tstaccuracy])
+    err_df = pd.DataFrame.from_records(error_data, columns=['iteration', 'training_error', 'test_error'])
+    acc_df = pd.DataFrame.from_records(error_data, columns=['iteration', 'training_accuracy', 'test_accuracy'])
+    return err_df, acc_df
 
 
-def plot_accuracy_function(df):
+def plot_accuracy_function(df, title):
     smooth_df = pd.rolling_mean(df, 5)
-    smooth_df.plot(title='Error as a function of training epochs (smoothed)')
+    smooth_df.plot(title=title)
 

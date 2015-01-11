@@ -7,7 +7,7 @@ from pybrain.tools.shortcuts import buildNetwork
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.structure.modules import SoftmaxLayer
 
-from datasets import load_higgs_train
+from algo_evaluation.datasets import load_higgs_train
 from algo_evaluation import LOGGER, TEST_DATA_SPLIT
 
 
@@ -32,7 +32,7 @@ class NeuralNetwork:
         LOGGER.info("Input and output dimensions: %s, %s", self.trndata.indim, self.trndata.outdim)
 
     def _create_trainer(self):
-        self.fnn = buildNetwork(self.trndata.indim, 5, self.trndata.outdim, outclass=SoftmaxLayer)
+        self.fnn = buildNetwork(self.trndata.indim, 2, self.trndata.outdim, outclass=SoftmaxLayer)
         self.trainer = BackpropTrainer(self.fnn, dataset=self.trndata, momentum=0.1, verbose=True, weightdecay=0.01)
 
     def train(self, train_epoch):

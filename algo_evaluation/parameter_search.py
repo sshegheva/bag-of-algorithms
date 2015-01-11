@@ -5,8 +5,8 @@ from sklearn.metrics import classification_report
 from algo_evaluation import LOGGER
 
 
-def grid_search_best_parameter(split_dataset, clf, tuned_parameters):
-    scores = ['precision', 'recall']
+def grid_search_best_parameter(split_dataset, clf, tuned_parameters, scores=('precision', 'recall')):
+    scores = scores
 
     for score in scores:
         LOGGER.info("# Tuning hyper-parameters for %s" % score)

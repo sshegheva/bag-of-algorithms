@@ -14,7 +14,7 @@ from algo_evaluation import LOGGER, TEST_DATA_SPLIT
 class NeuralNetwork:
     def __init__(self, data,):
         self.features, self.weights, labels = data
-        self.labels = np.array([1 if l == 'b' else 0 for l in labels])
+        self.labels = np.array([1 if l == 's' else 0 for l in labels])
         self.sample_size = self.features.shape[0]
         LOGGER.info('Loaded features %s', self.features.shape)
         LOGGER.info('Loaded weights %s', self.weights.shape)

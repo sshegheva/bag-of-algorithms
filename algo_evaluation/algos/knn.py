@@ -61,7 +61,7 @@ def estimate_best_n_neighbours():
     n_neighbours and plot the accuracy function of n_neighbours
     :return: the best n_neighbours setting
     """
-    n_neighbours_range = np.arange(1.0, 20.0, 2.0)
+    n_neighbours_range = np.arange(1, 20, 2)
     data = load_higgs_train()
     records = [[n_neighbours] + list(run_knn(data=data, n_neighbours=n_neighbours))
                for n_neighbours in n_neighbours_range]

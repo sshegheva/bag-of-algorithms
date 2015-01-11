@@ -10,11 +10,15 @@ Higgs Dataset:
     which were selected by  the physicists of ATLAS
     it can happen that for some entries some variables are meaningless or cannot be computed;
     in this case, their value is -999.0 which is outside the normal range of all variables
+
+
+Bidding Dataset:
+
 """
 import pandas as pd
 import numpy as np
 from sklearn.cross_validation import train_test_split
-from algorithms import TEST_DATA, TRAINING_DATA, LOGGER
+from algorithms import BIDDING_DATA, HIGGS_DATA, LOGGER
 
 
 def load_higgs_train(sample_size=None):
@@ -26,7 +30,7 @@ def load_higgs_train(sample_size=None):
     - pick only derived feature
     :return: dataframe
     """
-    df = pd.read_csv(TRAINING_DATA, nrows=sample_size)
+    df = pd.read_csv(HIGGS_DATA['training'], nrows=sample_size)
     df = df.replace(-999.000, np.nan).dropna()
     df.set_index('EventId', inplace=True)
     LOGGER.info('Loaded higgs training dataset of size %s', len(df))
@@ -40,7 +44,19 @@ def load_higgs_train(sample_size=None):
 
 
 def load_higgs_test():
-    df = pd.read_csv(TEST_DATA)
+    df = pd.read_csv(HIGGS_DATA['test'])
+    LOGGER.info('Loaded higgs test dataset of size %s', len(df))
+    return df
+
+
+def load_bidding_train():
+    df = pd.read_csv(BIDDING_DATA['training'])
+    LOGGER.info('Loaded higgs training dataset of size %s', len(df))
+    return df
+
+
+def load_bidding_test():
+    df = pd.read_csv(BIDDING_DATA['test'])
     LOGGER.info('Loaded higgs test dataset of size %s', len(df))
     return df
 

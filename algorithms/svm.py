@@ -14,7 +14,7 @@ from sklearn.metrics import classification_report
 
 
 class SVM:
-    def __init__(self, data, c_error_term=1.0, gamma=0.0):
+    def __init__(self, data, c_error_term=100.0, gamma=0.0001):
         features, weights, labels = data
         self.feature_names = features.columns.tolist()
         self.gamma = gamma

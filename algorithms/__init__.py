@@ -18,8 +18,10 @@ LOGGER.setLevel(logging.DEBUG)
 PROJECT_PATH = os.path.abspath(__file__)
 ROOT_PATH = os.path.abspath(os.path.join(PROJECT_PATH, '../..'))
 DATA_PATH = os.path.join(ROOT_PATH, 'data')
-TRAINING_DATA = os.path.join(DATA_PATH, 'training/training.csv')
-TEST_DATA = os.path.join(DATA_PATH, 'test/test.csv')
+HIGGS_DATA = {'training': os.path.join(DATA_PATH, 'training/training.csv'),
+              'test': os.path.join(DATA_PATH, 'test/test.csv')}
+BIDDING_DATA = {'training': os.path.join(DATA_PATH, 'training/bidding_training.csv'),
+                'test':os.path.join(DATA_PATH, 'test/bidding_test.csv')}
 
 # how to split test data from the training data
 TEST_DATA_SPLIT = 0.33

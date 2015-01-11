@@ -8,7 +8,7 @@ from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.structure.modules import SoftmaxLayer
 
 from datasets import load_higgs_train
-from algorithms import LOGGER, TEST_DATA_SPLIT
+from algo_evaluation import LOGGER, TEST_DATA_SPLIT
 
 
 class NeuralNetwork:

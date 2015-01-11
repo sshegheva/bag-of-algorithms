@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn import tree
 from datasets import split_dataset, load_higgs_train
 from evaluation import evaluation_score
-from algorithms import LOGGER
+from algo_evaluation import LOGGER
 
 
 class DecisionTree:

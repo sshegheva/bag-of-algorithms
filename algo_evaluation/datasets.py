@@ -18,7 +18,7 @@ Bidding Dataset:
 import pandas as pd
 import numpy as np
 from sklearn.cross_validation import train_test_split
-from algorithms import BIDDING_DATA, HIGGS_DATA, LOGGER
+from algo_evaluation import BIDDING_DATA, HIGGS_DATA, LOGGER
 
 
 def load_higgs_train(sample_size=None):
@@ -62,4 +62,13 @@ def load_bidding_test():
 
 
 def split_dataset(features, weights, labels):
-    return train_test_split(features, weights, labels, test_size=0.33)
+    dataset = dict()
+    trnfeatures, tstfeatures, \
+        trnweights, tstweights, \
+        trnlabels, tstlabels = train_test_split(features, weights, labels, test_size=0.33)
+    dataset['training'] = {'features': trnfeatures, 'labels': trnlabels}
+    dataset['test'] = {'features': tstfeatures, 'labels': tstlabels}
+    dataset['weights'] = {'features': trnweights, 'labels': tstweights}
+    return dataset
+
+

@@ -8,7 +8,7 @@ import pandas as pd
 
 from sklearn import svm
 from datasets import split_dataset, load_higgs_train
-from algorithms import LOGGER
+from algo_evaluation import LOGGER
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import classification_report
 

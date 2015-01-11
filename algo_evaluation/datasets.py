@@ -66,9 +66,8 @@ def split_dataset(features, weights, labels):
     trnfeatures, tstfeatures, \
         trnweights, tstweights, \
         trnlabels, tstlabels = train_test_split(features, weights, labels, test_size=0.33)
-    dataset['training'] = {'features': trnfeatures, 'labels': trnlabels}
-    dataset['test'] = {'features': tstfeatures, 'labels': tstlabels}
-    dataset['weights'] = {'features': trnweights, 'labels': tstweights}
+    dataset['training'] = {'features': trnfeatures, 'labels': trnlabels, 'weights': trnweights}
+    dataset['test'] = {'features': tstfeatures, 'labels': tstlabels, 'weights': tstweights}
     return dataset
 
 

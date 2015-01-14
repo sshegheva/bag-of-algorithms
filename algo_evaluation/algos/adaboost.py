@@ -11,7 +11,7 @@ from algo_evaluation import LOGGER
 
 
 class AdaBoost:
-    def __init__(self, data, n_estimators=50, learning_rate=1.0):
+    def __init__(self, data, n_estimators=75, learning_rate=1.0):
         features, weights, labels = data
         self.clf = AdaBoostClassifier(n_estimators=n_estimators, learning_rate=learning_rate)
         LOGGER.info('Created Ada Boost classifier with params {}'.format({'n_estimators': n_estimators,
@@ -62,7 +62,7 @@ def estimate_best_n_estimators():
     n_estimators and plot the accuracy function of n_estimators
     :return: the best n_estimators setting
     """
-    n_estimators_range = np.arange(30, 80, 5)
+    n_estimators_range = np.arange(30, 100, 5)
     data = load_higgs_train()
     records = [[n_estimator] + list(run_AdaBoost(data=data, n_estimators=n_estimator))
                for n_estimator in n_estimators_range]
@@ -79,7 +79,7 @@ def estimate_best_learning_rate():
     learning_rate and plot the accuracy function of learning rate
     :return: the best learning rate setting
     """
-    learning_rate_range = np.arange(0.1, 2.2, 0.2)
+    learning_rate_range = np.arange(0.2, 2.0, 0.2)
     data = load_higgs_train()
     records = [[rate] + list(run_AdaBoost(data=data, learning_rate=rate))
                for rate in learning_rate_range]

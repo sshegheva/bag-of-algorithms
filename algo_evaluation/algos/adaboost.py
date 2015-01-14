@@ -79,7 +79,7 @@ def estimate_best_learning_rate():
     learning_rate and plot the accuracy function of learning rate
     :return: the best learning rate setting
     """
-    learning_rate_range = np.arange(0.1, 5.2, 0.2)
+    learning_rate_range = np.arange(0.1, 2.2, 0.2)
     data = load_higgs_train()
     records = [[rate] + list(run_AdaBoost(data=data, learning_rate=rate))
                for rate in learning_rate_range]

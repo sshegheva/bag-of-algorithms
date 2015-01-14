@@ -62,17 +62,34 @@ def estimate_best_n_estimators():
     n_estimators and plot the accuracy function of n_estimators
     :return: the best n_estimators setting
     """
-    n_estimators_range = np.arange(1, 50, 2)
+    n_estimators_range = np.arange(30, 80, 5)
     data = load_higgs_train()
     records = [[n_estimator] + list(run_AdaBoost(data=data, n_estimators=n_estimator))
                for n_estimator in n_estimators_range]
-    LOGGER.info('Performed evaluation of the n_neighbours setting choice')
-    columns = ['n_neighbours', 'training_score', 'test_score']
+    LOGGER.info('Performed evaluation of the n_estimators setting choice')
+    columns = ['n_estimators', 'training_score', 'test_score']
     df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
     LOGGER.info(df)
     return df
 
 
-def plot_accuracy_function(df):
+def estimate_best_learning_rate():
+    """
+    Run Ada Boost classifier with multiple settings of
+    learning_rate and plot the accuracy function of learning rate
+    :return: the best learning rate setting
+    """
+    learning_rate_range = np.arange(0.1, 5.2, 0.2)
+    data = load_higgs_train()
+    records = [[rate] + list(run_AdaBoost(data=data, learning_rate=rate))
+               for rate in learning_rate_range]
+    LOGGER.info('Performed evaluation of the learning_rate setting choice')
+    columns = ['learning_rate', 'training_score', 'test_score']
+    df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
+    LOGGER.info(df)
+    return df
+
+
+def plot_accuracy_function(df, title):
     smooth_df = pd.rolling_mean(df, 5)
-    smooth_df.plot(title='Accuracy change as a function of n_neighbours (smoothed)')
+    smooth_df.plot(title=title)

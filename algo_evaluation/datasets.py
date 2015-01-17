@@ -67,7 +67,6 @@ def load_higgs_train(sample_size=None):
     df = pd.read_csv(HIGGS_DATA['training'], nrows=sample_size)
     df = df.replace(-999.000, np.nan).dropna()
     df.set_index('EventId', inplace=True)
-    LOGGER.info('Loaded higgs training dataset of size %s', len(df))
     columns = df.columns
     derived_features_names = [f for f in columns if f.startswith('DER')]
     derived_df = df[derived_features_names]

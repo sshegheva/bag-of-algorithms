@@ -64,9 +64,11 @@ def estimate_best_min_samples_split():
 def plot_accuracy_function(df, smoothing_factor=5):
     gini_df = df[['gini_training_score', 'gini_test_score']]
     entropy_df = df[['entropy_training_score', 'entropy_test_score']]
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16, 8), sharex=False, sharey=True)
-    pd.rolling_mean(gini_df, smoothing_factor).plot(ax=axes[0], title='Accuracy change as a function of min_samples_split (smoothed)')
-    pd.rolling_mean(entropy_df, smoothing_factor).plot(ax=axes[1], title='Accuracy change as a function of min_samples_split (smoothed)')
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
+    pd.rolling_mean(gini_df, smoothing_factor).plot(ax=axes[0],
+                                                    title='Accuracy f(min_samples_split)\n with Gini split')
+    pd.rolling_mean(entropy_df, smoothing_factor).plot(ax=axes[1],
+                                                       title='Accuracy f(min_samples_split)\n with entropy split')
 
 
 

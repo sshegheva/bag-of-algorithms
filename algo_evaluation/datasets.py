@@ -17,8 +17,42 @@ Bidding Dataset:
 """
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 from algo_evaluation import BIDDING_DATA, HIGGS_DATA, LOGGER, TEST_DATA_SPLIT
+
+
+def describe_higgs_raw():
+    df = pd.read_csv(HIGGS_DATA['training'])
+    derived = ['EventId', 'DER_mass_jet_jet', 'Label']
+    primitive = ['EventId', 'PRI_jet_subleading_pt', 'Label']
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16, 8), sharex=False, sharey=False)
+    df[derived][df['Label'] == 's'].plot(kind='scatter',
+                                          x=derived[0],
+                                          y=derived[1],
+                                          color='DarkBlue',
+                                          label='Signal',
+                                          ax=axes[0])
+    df[derived][df['Label'] == 'b'].plot(kind='scatter',
+                                         x=derived[0],
+                                         y=derived[1],
+                                         color='DarkRed',
+                                         label='Background',
+                                         ax=axes[0])
+    df[primitive][df['Label'] == 's'].plot(kind='scatter',
+                                          x=primitive[0],
+                                          y=primitive[1],
+                                          color='DarkBlue',
+                                          label='Signal',
+                                          ax=axes[1])
+    df[primitive][df['Label'] == 'b'].plot(kind='scatter',
+                                         x=primitive[0],
+                                         y=primitive[1],
+                                         color='DarkRed',
+                                         label='Background',
+                                         ax=axes[1])
+    return df
+
 
 
 def load_higgs_train(sample_size=None):

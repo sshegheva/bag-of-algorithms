@@ -2,12 +2,11 @@ import numpy as np
 import pandas as pd
 from pybrain.datasets import ClassificationDataSet
 from pybrain.utilities import percentError
-from pybrain.tools.validation import Validator
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.structure.connections import FullConnection
-from pybrain.structure.modules import SigmoidLayer
+from pybrain.structure.modules import SigmoidLayer, SoftmaxLayer
 from pybrain.structure.networks import FeedForwardNetwork
-
+from sklearn.metrics import accuracy_score
 from algo_evaluation.datasets import load_higgs_train
 from algo_evaluation import LOGGER, TEST_DATA_SPLIT
 
@@ -25,13 +24,15 @@ class NeuralNetwork:
         ds = ClassificationDataSet(self.features.shape[1], 1, nb_classes=len(classes))
         for i in range(self.sample_size):
             ds.addSample(self.features.iloc[i], self.labels[i])
-        self.trndata, self.tstdata = ds.splitWithProportion(TEST_DATA_SPLIT)
+        self.tstdata, self.trndata = ds.splitWithProportion(TEST_DATA_SPLIT)
+        self.tstdata._convertToOneOfMany()
+        self.trndata._convertToOneOfMany()
 
     def _create_trainer(self):
         self.fnn = FeedForwardNetwork()
         inLayer = SigmoidLayer(self.trndata.indim)
         hiddenLayer = SigmoidLayer(int(self.trndata.indim))
-        outLayer = SigmoidLayer(self.trndata.outdim)
+        outLayer = SoftmaxLayer(self.trndata.outdim)
 
         self.fnn.addInputModule(inLayer)
         self.fnn.addModule(hiddenLayer)
@@ -45,10 +46,10 @@ class NeuralNetwork:
         self.fnn.sortModules()
 
         self.trainer = BackpropTrainer(self.fnn, dataset=self.trndata,
-                                       momentum=0.1,
+                                       momentum=0.99,
                                        verbose=False,
                                        weightdecay=0.01,
-                                       learningrate=1.0)
+                                       learningrate=0.001)
 
     def train(self, train_epoch=5):
         self.trainer.trainEpochs(train_epoch)
@@ -62,18 +63,9 @@ class NeuralNetwork:
         trnerror = percentError(self.trainer.testOnClassData(dataset=self.trndata), self.trndata['class'])
         tsterror = percentError(self.trainer.testOnClassData(dataset=self.tstdata), self.tstdata['class'])
         LOGGER.info("epoch: %4d", self.trainer.totalepochs)
-        LOGGER.info("train error: %5.4f", trnerror)
-        LOGGER.info("test error: %5.4f", tsterror)
+        LOGGER.info("train error: %s", trnerror)
+        LOGGER.info("test error: %s", tsterror)
         return self.trainer.totalepochs, trnerror, tsterror
-
-    def estimate_accuracy(self):
-        training_predictions = self.predict(self.trndata)
-        test_predictions = self.predict(self.tstdata)
-        trnaccuracy = Validator.classificationPerformance(training_predictions, self.trndata['target'])
-        tstaccuracy = Validator.classificationPerformance(test_predictions, self.tstdata['target'])
-        LOGGER.info("train accuracy: %5.4f", trnaccuracy)
-        LOGGER.info("test accuracy: %5.4f", tstaccuracy)
-        return self.trainer.totalepochs, trnaccuracy, tstaccuracy
 
 
 def run_neural_net(data):
@@ -84,17 +76,18 @@ def run_neural_net(data):
     nn.train()
     nn.predict()
     nn.estimate_error()
+    return nn
 
 
 def estimate_training_iterations():
     data = load_higgs_train()
     nn = NeuralNetwork(data)
-    error_data = []
-    for i in range(5):
+    data = []
+    for i in range(50):
         nn.train(train_epoch=1)
-        total_epochs, trnerror, tsterror = nn.estimate_error()
-        error_data.append([total_epochs, trnerror, tsterror])
-    err_df = pd.DataFrame.from_records(error_data, columns=['iteration', 'training_error', 'test_error'])
+        total_epochs, trn, tst = nn.estimate_error()
+        data.append([total_epochs, trn, tst])
+    err_df = pd.DataFrame.from_records(data, columns=['iteration', 'training_error', 'test_error'])
     return err_df
 
 

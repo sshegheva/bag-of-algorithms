@@ -1,13 +1,13 @@
 """
 Evaluate Support Vector Machines
 """
-import random
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from sklearn import svm
-from datasets import split_dataset, load_higgs_train
+from algo_evaluation.datasets import split_dataset, load_higgs_train
 from algo_evaluation import LOGGER
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import classification_report
@@ -16,48 +16,40 @@ from sklearn.metrics import classification_report
 class SVM:
     def __init__(self, data, c_error_term=100.0, gamma=0.0001):
         features, weights, labels = data
-        self.feature_names = features.columns.tolist()
         self.gamma = gamma
         self.c = c_error_term
         self.clf = svm.SVC(C=self.c, gamma=self.gamma)
-        LOGGER.info('Created SVM classifier with C = %s and gamma = %s', self.c, self.gamma)
         self.predictions, self.trnaccuracy, self.tstaccuracy = None, None, None
-        self.trnfeatures, self.tstfeatures, \
-            self.trnweights, self.tstweights, \
-            self.trnlabels, self.tstlabels = split_dataset(features, weights, labels)
+        self.dataset = split_dataset(features, weights, labels)
 
     def train(self):
         """
         Train support vector machines on the higgs dataset
         :return: classifier
         """
-        self.clf = self.clf.fit(self.trnfeatures, self.trnlabels)
-        LOGGER.info('Trained decision tree classifier')
+        self.clf = self.clf.fit(self.dataset['training']['features'], self.dataset['training']['labels'])
 
     def predict(self):
         """
         Predict label using svm
         :return:
         """
-        self.predictions = self.clf.predict(self.tstfeatures)
-        LOGGER.info('Generated predictions')
+        self.predictions = self.clf.predict(self.dataset['test']['features'])
 
     def evaluate(self):
-        self.trnaccuracy = self.clf.score(self.trnfeatures,
-                                          self.trnlabels,
-                                          sample_weight=self.trnweights)
-        self.tstaccuracy = self.clf.score(self.tstfeatures,
-                                          self.tstlabels,
-                                          sample_weight=self.tstweights)
-        LOGGER.info('Training Weighted Accuracy score = %s', self.trnaccuracy)
-        LOGGER.info('Test Weighted Accuracy score = %s', self.tstaccuracy)
+        self.trnaccuracy = self.clf.score(self.dataset['training']['features'],
+                                          self.dataset['training']['labels'],
+                                          sample_weight=self.dataset['training']['weights'])
+        self.tstaccuracy = self.clf.score(self.dataset['test']['features'],
+                                          self.dataset['test']['labels'],
+                                          sample_weight=self.dataset['test']['weights'])
 
 
-def run_svm(data, gamma=0.0):
+def run_svm(data, c_error_term=100.0, gamma=0.0001):
     """
     Run and evaluate svm with default settings
     """
-    dt = SVM(data=data, gamma=gamma)
+    dt = SVM(data=data, c_error_term=c_error_term, gamma=gamma)
     dt.train()
     dt.predict()
     dt.evaluate()
@@ -89,7 +81,7 @@ def estimate_best_c():
     """
     c_range = [10**n for n in range(4)]
     data = load_higgs_train()
-    records = [[c] + list(run_svm(data=data, c=c))
+    records = [[c] + list(run_svm(data=data, c_error_term=c))
                for c in c_range]
     LOGGER.info('Performed evaluation of the C setting choice')
     columns = ['C', 'training_score', 'test_score']
@@ -106,7 +98,7 @@ def grid_search_best_parameter(data):
     tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4], 'C': [1, 10, 100, 1000]}]
 
     scores = ['precision', 'recall']
-
+    reports = {}
     for score in scores:
         LOGGER.info("# Tuning hyper-parameters for %s" % score)
         clf = GridSearchCV(svm.SVC(C=1), tuned_parameters, cv=5, scoring=score)
@@ -122,12 +114,15 @@ def grid_search_best_parameter(data):
         LOGGER.info("The model is trained on the full development set.")
         LOGGER.info("The scores are computed on the full evaluation set.")
         y_true, y_pred = tstlabels, clf.predict(tstfeatures)
-        LOGGER.info(classification_report(y_true, y_pred))
+        reports[score] = classification_report(y_true, y_pred)
+    return reports
 
 
-def plot_accuracy_function(df):
-    smooth_df = pd.rolling_mean(df, 5)
-    smooth_df.plot(title='Accuracy change as a function of gamma (smoothed)')
+
+def plot_accuracy_functions(c_df, gamma_df, smoothing_factor=5):
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
+    pd.rolling_mean(c_df, smoothing_factor).plot(ax=axes[0], title='Accuracy f(C)')
+    pd.rolling_mean(gamma_df, smoothing_factor).plot(ax=axes[1], title='Accuracy f(gamma)')
 
 
 

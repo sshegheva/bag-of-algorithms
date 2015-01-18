@@ -14,7 +14,6 @@ class KNN:
     def __init__(self, data, n_neighbours=3):
         features, weights, labels = data
         self.clf = KNeighborsClassifier(n_neighbors=n_neighbours)
-        LOGGER.info('Created KNN classifier with %s neighbours', n_neighbours)
         self.predictions, self.trnaccuracy, self.tstaccuracy = None, None, None
         self.dataset = split_dataset(features, weights, labels)
 
@@ -23,7 +22,6 @@ class KNN:
         Train K nearest neighbours on the higgs dataset
         """
         self.clf = self.clf.fit(self.dataset['training']['features'], self.dataset['training']['labels'])
-        LOGGER.info('Trained KNN classifier')
 
     def predict(self):
         """
@@ -31,7 +29,6 @@ class KNN:
         :return:
         """
         self.predictions = self.clf.predict(self.dataset['test']['features'])
-        LOGGER.info('Generated predictions')
 
     def evaluate(self):
         self.trnaccuracy = self.clf.score(self.dataset['training']['features'],
@@ -40,8 +37,6 @@ class KNN:
         self.tstaccuracy = self.clf.score(self.dataset['test']['features'],
                                           self.dataset['test']['labels'],
                                           sample_weight=self.dataset['test']['weights'])
-        LOGGER.info('Training Weighted Accuracy score = %s', self.trnaccuracy)
-        LOGGER.info('Test Weighted Accuracy score = %s', self.tstaccuracy)
 
 
 def run_knn(data, n_neighbours):
@@ -61,19 +56,17 @@ def estimate_best_n_neighbours():
     n_neighbours and plot the accuracy function of n_neighbours
     :return: the best n_neighbours setting
     """
-    n_neighbours_range = np.arange(1, 20, 2)
+    n_neighbours_range = np.arange(1, 26, 2)
     data = load_higgs_train()
     records = [[n_neighbours] + list(run_knn(data=data, n_neighbours=n_neighbours))
                for n_neighbours in n_neighbours_range]
-    LOGGER.info('Performed evaluation of the n_neighbours setting choice')
     columns = ['n_neighbours', 'training_score', 'test_score']
     df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
-    LOGGER.info(df)
     return df
 
 
-def plot_accuracy_function(df):
-    smooth_df = pd.rolling_mean(df, 5)
+def plot_accuracy_function(df, smoothing_factor=5):
+    smooth_df = pd.rolling_mean(df, smoothing_factor)
     smooth_df.plot(title='Accuracy change as a function of n_neighbours (smoothed)')
 
 

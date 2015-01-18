@@ -14,10 +14,10 @@ from sklearn.metrics import classification_report
 
 
 class SVM:
-    def __init__(self, data, c_error_term=100.0, gamma=0.0001):
+    def __init__(self, data, penalty_term=1.0, gamma=0.0):
         features, weights, labels = data
         self.gamma = gamma
-        self.c = c_error_term
+        self.c = penalty_term
         self.clf = svm.SVC(C=self.c, gamma=self.gamma)
         self.predictions, self.trnaccuracy, self.tstaccuracy = None, None, None
         self.dataset = split_dataset(features, weights, labels)
@@ -45,11 +45,11 @@ class SVM:
                                           sample_weight=self.dataset['test']['weights'])
 
 
-def run_svm(data, c_error_term=100.0, gamma=0.0001):
+def run_svm(data, penalty_term=1.0, gamma=0.0):
     """
     Run and evaluate svm with default settings
     """
-    dt = SVM(data=data, c_error_term=c_error_term, gamma=gamma)
+    dt = SVM(data=data, penalty_term=penalty_term, gamma=gamma)
     dt.train()
     dt.predict()
     dt.evaluate()
@@ -81,7 +81,7 @@ def estimate_best_c():
     """
     c_range = [10**n for n in range(4)]
     data = load_higgs_train()
-    records = [[c] + list(run_svm(data=data, c_error_term=c))
+    records = [[c] + list(run_svm(data=data, penalty_term=c))
                for c in c_range]
     LOGGER.info('Performed evaluation of the C setting choice')
     columns = ['C', 'training_score', 'test_score']
@@ -117,11 +117,9 @@ def grid_search_best_parameter(data):
         reports[score] = classification_report(y_true, y_pred)
     return reports
 
-
-
 def plot_accuracy_functions(c_df, gamma_df, smoothing_factor=5):
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
-    pd.rolling_mean(c_df, smoothing_factor).plot(ax=axes[0], title='Accuracy f(C)')
+    pd.rolling_mean(c_df, smoothing_factor).plot(ax=axes[0], title='Accuracy f(penalty term C) ')
     pd.rolling_mean(gamma_df, smoothing_factor).plot(ax=axes[1], title='Accuracy f(gamma)')
 
 

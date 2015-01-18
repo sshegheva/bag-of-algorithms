@@ -31,7 +31,7 @@ class NeuralNetwork:
     def _create_trainer(self):
         self.fnn = FeedForwardNetwork()
         inLayer = SigmoidLayer(self.trndata.indim)
-        hiddenLayer = SigmoidLayer(int(self.trndata.indim))
+        hiddenLayer = SigmoidLayer(int(self.trndata.indim * 0.5))
         outLayer = SoftmaxLayer(self.trndata.outdim)
 
         self.fnn.addInputModule(inLayer)
@@ -84,7 +84,7 @@ def estimate_training_iterations():
     nn = NeuralNetwork(data)
     data = []
     for i in range(50):
-        nn.train(train_epoch=1)
+        nn.train(train_epoch=5)
         total_epochs, trn, tst = nn.estimate_error()
         data.append([total_epochs, trn, tst])
     err_df = pd.DataFrame.from_records(data, columns=['iteration', 'training_error', 'test_error'])

@@ -122,6 +122,7 @@ def tradeoff_estimators_learning_rate(raw_data):
 
 
 def plot_tradeoff(trades_df):
+    plt.figure(figsize=(6, 4))
     plt.pcolor(trades_df[['n_estimators', 'learning_rate', 'test_accuracy']])
     plt.title('Accuracy trade off as a result of tuning \n n_estimators and learning rate')
     plt.xlabel('Learning Rate')

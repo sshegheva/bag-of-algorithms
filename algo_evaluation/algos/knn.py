@@ -67,7 +67,7 @@ def estimate_best_n_neighbours():
 
 def plot_accuracy_function(df, smoothing_factor=5):
     smooth_df = pd.rolling_mean(df, smoothing_factor)
-    smooth_df.plot(title='Accuracy change as a function of n_neighbours (smoothed)')
+    smooth_df.plot(title='Accuracy change as a function of n_neighbours (smoothed)', figsize=(6, 4))
 
 
 

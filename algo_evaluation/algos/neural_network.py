@@ -62,9 +62,6 @@ class NeuralNetwork:
     def estimate_error(self):
         trnerror = percentError(self.trainer.testOnClassData(dataset=self.trndata), self.trndata['class'])
         tsterror = percentError(self.trainer.testOnClassData(dataset=self.tstdata), self.tstdata['class'])
-        LOGGER.info("epoch: %4d", self.trainer.totalepochs)
-        LOGGER.info("train error: %s", trnerror)
-        LOGGER.info("test error: %s", tsterror)
         return self.trainer.totalepochs, trnerror, tsterror
 
 
@@ -75,15 +72,14 @@ def run_neural_net(data):
     nn = NeuralNetwork(data)
     nn.train()
     nn.predict()
-    nn.estimate_error()
-    return nn
+    return nn.estimate_error()
 
 
 def estimate_training_iterations():
     data = load_higgs_train()
     nn = NeuralNetwork(data)
     data = []
-    for i in range(50):
+    for i in range(500):
         nn.train(train_epoch=5)
         total_epochs, trn, tst = nn.estimate_error()
         data.append([total_epochs, trn, tst])

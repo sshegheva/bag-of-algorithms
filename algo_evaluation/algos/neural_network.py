@@ -76,7 +76,7 @@ def run_neural_net(data, learning_rate=0.1):
     return nn.estimate_error()
 
 
-def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.01, 0.1, 1.0, 10.0])):
+def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.01, 0.1])):
     data = load_higgs_train()
 
     def estimate_error(nn):
@@ -85,13 +85,16 @@ def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.0
             nn.train(train_epoch=1)
             total_epochs, trn, tst = nn.estimate_error()
             error_data.append([nn.learning_rate, total_epochs, trn, tst])
-        return error_data
+        err_df = pd.DataFrame.from_records(error_data, columns=['learning_rate', 'iteration', 'training_error', 'test_error'])
+        return err_df
 
-    records = [estimate_error(NeuralNetwork(data, l)) for l in learning_rate_range]
-    err_df = pd.DataFrame.from_records(records, columns=['learning_rate', 'iteration', 'training_error', 'test_error'])
-    err_df['training_accuracy'] = 1 - err_df['training_error'] / 100
-    err_df['test_accuracy'] = 1 - err_df['test_error'] / 100
-    return err_df.set_index('iteration')
+    dfs = [estimate_error(NeuralNetwork(data, l)) for l in learning_rate_range]
+
+    df = pd.concat(dfs)
+
+    df['training_accuracy'] = 1 - df['training_error'] / 100
+    df['test_accuracy'] = 1 - df['test_error'] / 100
+    return df.set_index('iteration')
 
 
 def plot_accuracy_function(df, title='Accuracy f (iterations)'):

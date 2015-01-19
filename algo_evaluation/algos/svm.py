@@ -14,10 +14,10 @@ from sklearn.metrics import classification_report
 
 
 class SVM:
-    def __init__(self, data, penalty_term=1.0, gamma=0.0):
+    def __init__(self, data, regularization_term=1.0, gamma=0.0):
         features, weights, labels = data
         self.gamma = gamma
-        self.c = penalty_term
+        self.c = regularization_term
         self.clf = svm.SVC(C=self.c, gamma=self.gamma)
         self.predictions, self.trnaccuracy, self.tstaccuracy = None, None, None
         self.dataset = split_dataset(features, weights, labels)
@@ -45,11 +45,11 @@ class SVM:
                                           sample_weight=self.dataset['test']['weights'])
 
 
-def run_svm(data, penalty_term=1.0, gamma=0.0):
+def run_svm(data, regularization_term=1.0, gamma=0.0):
     """
     Run and evaluate svm with default settings
     """
-    dt = SVM(data=data, penalty_term=penalty_term, gamma=gamma)
+    dt = SVM(data=data, regularization_term=regularization_term, gamma=gamma)
     dt.train()
     dt.predict()
     dt.evaluate()
@@ -81,7 +81,7 @@ def estimate_best_c():
     """
     c_range = [10**n for n in range(4)]
     data = load_higgs_train()
-    records = [[c] + list(run_svm(data=data, penalty_term=c))
+    records = [[c] + list(run_svm(data=data, regularization_term=c))
                for c in c_range]
     LOGGER.info('Performed evaluation of the C setting choice')
     columns = ['C', 'training_score', 'test_score']
@@ -89,6 +89,19 @@ def estimate_best_c():
     LOGGER.info(df)
     return df
 
+
+def estimate_dataset_size():
+    data = load_higgs_train()
+    features, weights, labels = data
+    records = []
+    for n in range(1, 10):
+        f = features[:n * len(features)/10]
+        w = weights[:n * len(weights)/10]
+        l = labels[:n * len(labels)/10]
+        records.append([len(f)] + list(run_svm((f, w, l))))
+    columns = ['sample_size', 'training_score', 'test_score']
+    df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
+    return df
 
 def grid_search_best_parameter(data):
     features, weights, labels = data
@@ -119,7 +132,7 @@ def grid_search_best_parameter(data):
 
 def plot_accuracy_functions(c_df, gamma_df, smoothing_factor=5):
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
-    pd.rolling_mean(c_df, smoothing_factor).plot(ax=axes[0], title='Accuracy f(penalty term C) ')
+    pd.rolling_mean(c_df, smoothing_factor).plot(ax=axes[0], title='Accuracy f(regularization term C) ')
     pd.rolling_mean(gamma_df, smoothing_factor).plot(ax=axes[1], title='Accuracy f(gamma)')
 
 

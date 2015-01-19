@@ -130,10 +130,10 @@ def grid_search_best_parameter(data):
         reports[score] = classification_report(y_true, y_pred)
     return reports
 
-def plot_accuracy_functions(c_df, gamma_df, smoothing_factor=5):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
-    pd.rolling_mean(c_df, smoothing_factor).plot(ax=axes[0], title='Accuracy f(regularization term C) ')
-    pd.rolling_mean(gamma_df, smoothing_factor).plot(ax=axes[1], title='Accuracy f(gamma)')
+
+def plot_accuracy_function(size_df, smoothing_factor=5):
+    pd.rolling_mean(size_df, smoothing_factor).plot(title='Accuracy f(dataset size) ')
+
 
 
 

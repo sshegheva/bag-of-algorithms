@@ -39,7 +39,7 @@ class KNN:
                                           sample_weight=self.dataset['test']['weights'])
 
 
-def run_knn(data, n_neighbours, power_parameter=2):
+def run_knn(data, n_neighbours=50, power_parameter=2):
     """
     Run and evaluate KNN with default settings
     """
@@ -70,9 +70,9 @@ def estimate_best_power():
     Run KNN classifier with multiple settings of
     power parameter for distance metric
     """
-    p_range = [1, 2, 3]
+    p_range = {1: 'manhattan', 2: 'euclidean', 3: 'minkowski'}
     data = load_higgs_train()
-    records = [[p] + list(run_knn(data=data, power_parameter=p))
+    records = [[p_range[p]] + list(run_knn(data=data, power_parameter=p))
                for p in p_range]
     columns = ['metric', 'training_score', 'test_score']
     df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
@@ -80,11 +80,10 @@ def estimate_best_power():
 
 
 def plot_accuracy_function(neighbour_df, p_df, smoothing_factor=5):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=False)
     pd.rolling_mean(neighbour_df, smoothing_factor).plot(ax=axes[0],
                                                          title='Accuracy f(n_neighbours)')
-    pd.rolling_mean(p_df, smoothing_factor).plot(ax=axes[1],
-                                                        title='Accuracy f(metric)')
+    p_df.plot(ax=axes[1], kind='barh', title='Accuracy f(metric)')
 
 
 

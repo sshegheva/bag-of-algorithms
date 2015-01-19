@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from pybrain.datasets import ClassificationDataSet
 from pybrain.utilities import percentError
 from pybrain.supervised.trainers import BackpropTrainer
@@ -8,6 +9,7 @@ from pybrain.structure.modules import SigmoidLayer, SoftmaxLayer
 from pybrain.structure.networks import FeedForwardNetwork
 from algo_evaluation.datasets import load_higgs_train
 from algo_evaluation import TEST_DATA_SPLIT
+import math
 
 
 class NeuralNetwork:
@@ -94,10 +96,20 @@ def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.0
 
     df['training_accuracy'] = 1 - df['training_error'] / 100
     df['test_accuracy'] = 1 - df['test_error'] / 100
-    return df.set_index('iteration')
+    return df
 
 
-def plot_accuracy_function(df, title='Accuracy f (iterations)'):
-    smooth_df = pd.rolling_mean(df[['training_accuracy', 'test_accuracy']], 5)
-    smooth_df.plot(title=title)
+def plot_accuracy_function(df):
+    lr = df['learning_rate'].unique().tolist()
+    rows = math.ceil(len(lr)/2)
+    columns = 2
+    fig, axes = plt.subplots(nrows=rows, ncols=columns, figsize=(12, 6), sharex=False, sharey=True)
+    for r in range(rows):
+        for c in range(columns):
+            n = r + c
+            if len(lr) > n:
+                sub_df = df[df['learning_rate'] == lr[n]].set_index('iteration')
+                smooth_df = pd.rolling_mean(sub_df[['training_accuracy', 'test_accuracy']], 5)
+                title = 'Accuracy f (iterations) \n learning rate = {}'.format(lr[n])
+                smooth_df.plot(ax=axes[r][c], title=title)
 

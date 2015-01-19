@@ -78,7 +78,7 @@ def run_neural_net(data, learning_rate=0.1):
     return nn.estimate_error()
 
 
-def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.01, 0.1])):
+def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.001, 0.01, 0.1, 1.0])):
     data = load_higgs_train()
 
     def estimate_error(nn):
@@ -99,9 +99,9 @@ def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.0
     return df
 
 
-def plot_accuracy_function(df):
+def plot_accuracy_function(df, smooth_factor=5):
     lr = df['learning_rate'].unique().tolist()
-    rows = math.ceil(len(lr)/2)
+    rows = int(math.ceil(len(lr)/2))
     columns = 2
     fig, axes = plt.subplots(nrows=rows, ncols=columns, figsize=(12, 6), sharex=False, sharey=True)
     for r in range(rows):
@@ -109,7 +109,10 @@ def plot_accuracy_function(df):
             n = r + c
             if len(lr) > n:
                 sub_df = df[df['learning_rate'] == lr[n]].set_index('iteration')
-                smooth_df = pd.rolling_mean(sub_df[['training_accuracy', 'test_accuracy']], 5)
+                smooth_df = pd.rolling_mean(sub_df[['training_accuracy', 'test_accuracy']], smooth_factor)
                 title = 'Accuracy f (iterations) \n learning rate = {}'.format(lr[n])
-                smooth_df.plot(ax=axes[r][c], title=title)
+                if rows == 1:
+                    smooth_df.plot(ax=axes[c], title=title)
+                else:
+                    smooth_df.plot(ax=axes[r][c], title=title)
 

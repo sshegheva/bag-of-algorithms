@@ -6,9 +6,8 @@ from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.structure.connections import FullConnection
 from pybrain.structure.modules import SigmoidLayer, SoftmaxLayer
 from pybrain.structure.networks import FeedForwardNetwork
-from sklearn.metrics import accuracy_score
 from algo_evaluation.datasets import load_higgs_train
-from algo_evaluation import LOGGER, TEST_DATA_SPLIT
+from algo_evaluation import TEST_DATA_SPLIT
 
 
 class NeuralNetwork:

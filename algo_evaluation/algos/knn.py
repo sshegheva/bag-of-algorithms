@@ -4,16 +4,16 @@ Evaluate K nearest neighbours
 """
 import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from algo_evaluation.datasets import split_dataset, load_higgs_train
-from algo_evaluation import LOGGER
+
 
 
 class KNN:
-    def __init__(self, data, n_neighbours=3):
+    def __init__(self, data, n_neighbours=3, power_parameter=2):
         features, weights, labels = data
-        self.clf = KNeighborsClassifier(n_neighbors=n_neighbours)
+        self.clf = KNeighborsClassifier(n_neighbors=n_neighbours, p=power_parameter)
         self.predictions, self.trnaccuracy, self.tstaccuracy = None, None, None
         self.dataset = split_dataset(features, weights, labels)
 
@@ -39,11 +39,11 @@ class KNN:
                                           sample_weight=self.dataset['test']['weights'])
 
 
-def run_knn(data, n_neighbours):
+def run_knn(data, n_neighbours, power_parameter=2):
     """
     Run and evaluate KNN with default settings
     """
-    dt = KNN(data=data, n_neighbours=n_neighbours)
+    dt = KNN(data=data, n_neighbours=n_neighbours, power_parameter=power_parameter)
     dt.train()
     dt.predict()
     dt.evaluate()
@@ -65,9 +65,26 @@ def estimate_best_n_neighbours():
     return df
 
 
-def plot_accuracy_function(df, smoothing_factor=5):
-    smooth_df = pd.rolling_mean(df, smoothing_factor)
-    smooth_df.plot(title='Accuracy change as a function of n_neighbours (smoothed)', figsize=(6, 4))
+def estimate_best_power():
+    """
+    Run KNN classifier with multiple settings of
+    power parameter for distance metric
+    """
+    p_range = [1, 2, 3]
+    data = load_higgs_train()
+    records = [[p] + list(run_knn(data=data, power_parameter=p))
+               for p in p_range]
+    columns = ['metric', 'training_score', 'test_score']
+    df = pd.DataFrame.from_records(records, columns=columns, index=columns[0])
+    return df
+
+
+def plot_accuracy_function(neighbour_df, p_df, smoothing_factor=5):
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
+    pd.rolling_mean(neighbour_df, smoothing_factor).plot(ax=axes[0],
+                                                         title='Accuracy f(n_neighbours)')
+    pd.rolling_mean(p_df, smoothing_factor).plot(ax=axes[1],
+                                                        title='Accuracy f(metric)')
 
 
 

@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from sklearn.ensemble import AdaBoostClassifier
 from algo_evaluation.datasets import split_dataset, load_higgs_train
 from algo_evaluation.parameter_search import grid_search_best_parameter
-from algo_evaluation import LOGGER
 
 
 class AdaBoost:

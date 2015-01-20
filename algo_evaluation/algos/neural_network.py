@@ -104,9 +104,9 @@ def plot_accuracy_function(df, smooth_factor=5):
     rows = int(math.ceil(len(lr)/2))
     columns = 2
     fig, axes = plt.subplots(nrows=rows, ncols=columns, figsize=(12, 6), sharex=False, sharey=True)
+    n = 0 # store the counter for retrieving learning rates
     for r in range(rows):
         for c in range(columns):
-            n = r + c
             if len(lr) > n:
                 sub_df = df[df['learning_rate'] == lr[n]].set_index('iteration')
                 smooth_df = pd.rolling_mean(sub_df[['training_accuracy', 'test_accuracy']], smooth_factor)
@@ -115,4 +115,5 @@ def plot_accuracy_function(df, smooth_factor=5):
                     smooth_df.plot(ax=axes[c], title=title)
                 else:
                     smooth_df.plot(ax=axes[r][c], title=title)
+            n += 1
 

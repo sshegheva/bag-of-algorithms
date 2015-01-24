@@ -11,7 +11,6 @@ from algo_evaluation import LOGGER
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import classification_report
 
-
 class SVM:
     def __init__(self, data, regularization_term=1.0, gamma=0.0):
         features, weights, labels = data

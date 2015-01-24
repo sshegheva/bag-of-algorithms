@@ -27,7 +27,7 @@ def plot_training_points(decision_tree_classifier, feature_group, plot_number):
     plt.legend()
 
 
-def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
+def plot_learning_curve(estimator, title, X, y, axes, ylim=None, cv=None,
                         n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
     """
     Generate a simple plot of the test and traning learning curve.
@@ -59,12 +59,11 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
     n_jobs : integer, optional
         Number of jobs to run in parallel (default 1).
     """
-    plt.figure()
-    plt.title(title)
+    plt.title(title, axes=axes)
     if ylim is not None:
-        plt.ylim(*ylim)
-    plt.xlabel("Training examples")
-    plt.ylabel("Score")
+        plt.ylim(*ylim, axes=axes)
+    plt.xlabel("Training examples", axes=axes)
+    plt.ylabel("Score", axes=axes)
     train_sizes, train_scores, test_scores = learning_curve(
         estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
     train_scores_mean = np.mean(train_scores, axis=1)
@@ -75,14 +74,14 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
 
     plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
                      train_scores_mean + train_scores_std, alpha=0.1,
-                     color="r")
+                     color="r", axes=axes)
     plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
-                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
+                     test_scores_mean + test_scores_std, alpha=0.1, color="g", axes=axes)
     plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
-             label="Training score")
+             label="Training score", axes=axes)
     plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
-             label="Cross-validation score")
+             label="Cross-validation score", axes=axes)
 
-    plt.legend(loc="best")
+    plt.legend(loc="best", axes=axes)
     return plt
 

@@ -84,7 +84,7 @@ def load_higgs_test():
 
 
 def load_bidding_train():
-    df = pd.read_csv(BIDDING_DATA['training']).dropna()
+    df = pd.read_csv(BIDDING_DATA['training'], low_memory=False).dropna()
     features = df[df.columns.tolist()[:-1]]
     le = LabelEncoder()
     transformed = [le.fit_transform(features[f]) for f in features.columns]

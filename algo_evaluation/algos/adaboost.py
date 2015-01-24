@@ -11,7 +11,7 @@ from algo_evaluation.parameter_search import grid_search_best_parameter
 
 
 class AdaBoost:
-    def __init__(self, data, n_estimators=100, learning_rate=1.0):
+    def __init__(self, data, n_estimators=50, learning_rate=1.0):
         features, weights, labels = data
         self.clf = AdaBoostClassifier(n_estimators=n_estimators, learning_rate=learning_rate)
         self.predictions, self.trnaccuracy, self.tstaccuracy = None, None, None

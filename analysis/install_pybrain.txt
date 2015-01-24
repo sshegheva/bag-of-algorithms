@@ -1,2 +1,0 @@
-binstar search -t conda pybrain
-conda install -c https://conda.binstar.org/derickl pybrain

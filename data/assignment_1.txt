@@ -66,16 +66,42 @@ a description of your classification problems, and why you feel that they are in
 the training and testing error rates you obtained running the various learning algorithms on your problems. At the very least you should include graphs that show performance on both training and test data as a function of training size (note that this implies that you need to design a classification problem that has more than a trivial amount of data) and--for the algorithms that are iterative--training times.
 
 
-analyses of your results. Why did you get the results you did? Compare and contrast the different algorithms. What sort of changes might you make to each of those algorithms to improve performance? How fast were they in terms of wall clock time? Iterations? Would cross validation help (and if it would, why didn't you implement it?)? How much performance was due to the problems you chose? How about the values you chose for learning rates, stopping criteria, pruning methods, and so forth (and why doesn't your analysis show results for the different values you chose?)? Which algorithm performed best? How do you define best? Be creative and think of as many questions you can, and as many answers as you can.
+analyses of your results. Why did you get the results you did?
+Compare and contrast the different algorithms.
+What sort of changes might you make to each of those algorithms to improve performance?
+How fast were they in terms of wall clock time? Iterations?
+Would cross validation help (and if it would, why didn't you implement it?)?
+How much performance was due to the problems you chose?
+How about the values you chose for learning rates, stopping criteria, pruning methods, and so forth
+(and why doesn't your analysis show results for the different values you chose?)?
+Which algorithm performed best? How do you define best?
+Be creative and think of as many questions you can, and as many answers as you can.
+
 For the sanity of your graders, please keep your analysis as short as possible while still covering the requirements of the assignment: to facilitate this sanity, analysis writeup is limited to 12 pages.
 
 
 
 Grading Criteria
 
-You are being graded on your analysis more than anything else. Roughly speaking, implementing everything and getting it to run is worth maybe 0% of the grade on this assignment (I know you don't believe me, but in fact, steal the code; I not only don't care, I am encouraging you to use one of the many packages available both from the resources page and on the web). Of course, analysis without proof of working code makes the analysis suspect.
+You are being graded on your analysis more than anything else.
+Roughly speaking, implementing everything and getting it to run is worth maybe 0% of the grade on this assignment
+(I know you don't believe me, but in fact, steal the code;
+I not only don't care, I am encouraging you to use one of the many packages available both from the resources page and on the web). Of course, analysis without proof of working code makes the analysis suspect.
 
-The key thing is that your explanations should be both thorough and concise. Imagine you are writing a paper for the major conference in your field the year you will be graduating and you need to impress all those folks who will be deciding whether to interview you later. You don't want them to think you're shallow do you? Or that you're incapable of coming up with interesting classification problems, right? And you surely don't want them to think that you make up for a lack of content by blathering on about irrelevant aspects of your work? Of course not.
+The key thing is that your explanations should be both thorough and concise.
+Imagine you are writing a paper for the major conference in your field the year you will be graduating
+and you need to impress all those folks who will be deciding whether to interview you later.
 
-Finally, I'd like to point out that I am very particular about the format of the assignments. Follow the directions carefully. Failure to turn in files without the proper naming scheme, or anything else that makes the graders' lives unduly hard is simply going to lead to an ignored assignment. I am remarkably inflexible about this. Also, there will be no late assignments accepted, so start now. Have fun. One day you'll look back on this and smile. There may be tears, but they will be tears of joy.
+You don't want them to think you're shallow do you?
+Or that you're incapable of coming up with interesting classification problems, right?
+And you surely don't want them to think that you make up for a lack of content by blathering
+on about irrelevant aspects of your work? Of course not.
+
+Finally, I'd like to point out that I am very particular about the format of the assignments.
+Follow the directions carefully.
+Failure to turn in files without the proper naming scheme,
+or anything else that makes the graders' lives unduly hard is simply going to lead to an ignored assignment.
+I am remarkably inflexible about this.
+Also, there will be no late assignments accepted, so start now.
+Have fun. One day you'll look back on this and smile. There may be tears, but they will be tears of joy.
 

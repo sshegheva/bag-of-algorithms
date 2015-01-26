@@ -29,6 +29,7 @@ Note: Code and Analysis can also be cloned from the repo: https://github.com/ssh
  - Analysis can be reproduced interactively using IPython Notebook
  
     - change the PYTHONPATH in the `bin/start_notebook.sh` to location where code was unzipped
+        (eg. see script bin/start_notebook.sh)
  
     - `./bin/start_notebook.sh`
     
@@ -38,7 +39,7 @@ Note: Code and Analysis can also be cloned from the repo: https://github.com/ssh
     
     - you can select `Cell->Run All` or execute statements one by one by pressing `Shift+Enter`
     
- - Notebook can subsequently be turned into PDF
+ - Notebook can subsequently be turned into PDF (you might need additional libraries for this)
  
     - `./bin/convert_notebooks.sh`
     

@@ -9,15 +9,12 @@ from pybrain.datasets import ClassificationDataSet
 from pybrain.utilities import percentError
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.optimization import HillClimber
+from pybrain.optimization.populationbased.ga import GA
 from pybrain.structure.connections import FullConnection
 from pybrain.structure.modules import SigmoidLayer, SoftmaxLayer
 from pybrain.structure.networks import FeedForwardNetwork
 
 from algo_evaluation.datasets import load_higgs_train, split_dataset
-from algo_evaluation import TEST_DATA_SPLIT
-
-
-
 
 
 class NeuralNetwork:
@@ -81,8 +78,8 @@ class NeuralNetwork:
         self._create_trainer(self.learning_rate, self.momentum)
         self.trainer.trainEpochs(train_epoch)
 
-    def learn_weights(self, max_evaluations):
-        return HillClimber(self.tstdata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations).learn()
+    def learn_weights(self, max_evaluations, algoritm):
+        return algoritm(self.tstdata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations).learn()
 
     def predict(self, dataset=None):
         if dataset is None:
@@ -119,7 +116,20 @@ def evaluate_hill_climbing(data, max_evaluation_range=xrange(10, 100, 10)):
     nn = NeuralNetwork(data=data)
     acc_data = []
     for max_eval in max_evaluation_range:
-        nn.learn_weights(max_evaluations=max_eval)
+        nn.learn_weights(max_evaluations=max_eval, algoritm=HillClimber)
+        trnacc = nn.train_accuracy()
+        tstacc = nn.test_accuracy()
+        acc_data.append([max_eval, trnacc, tstacc])
+    return pd.DataFrame.from_records(acc_data,
+                                     columns=['max_evaluations', 'trnacc', 'tstacc'],
+                                     index=['max_evaluations'])
+
+
+def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(10, 100, 10)):
+    nn = NeuralNetwork(data=data)
+    acc_data = []
+    for max_eval in max_evaluation_range:
+        nn.learn_weights(max_evaluations=max_eval, algoritm=GA)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()
         acc_data.append([max_eval, trnacc, tstacc])

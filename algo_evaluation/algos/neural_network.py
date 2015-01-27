@@ -1,37 +1,59 @@
+import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+from sklearn.metrics import accuracy_score
+
 from pybrain.datasets import ClassificationDataSet
 from pybrain.utilities import percentError
 from pybrain.supervised.trainers import BackpropTrainer
+from pybrain.optimization import HillClimber
 from pybrain.structure.connections import FullConnection
 from pybrain.structure.modules import SigmoidLayer, SoftmaxLayer
 from pybrain.structure.networks import FeedForwardNetwork
-from algo_evaluation.datasets import load_higgs_train
+
+from algo_evaluation.datasets import load_higgs_train, split_dataset
 from algo_evaluation import TEST_DATA_SPLIT
-import math
+
+
+
 
 
 class NeuralNetwork:
     def __init__(self, data, learning_rate=0.1, momentum=0.1):
         self.features, self.weights, labels = data
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
-        self.sample_size = self.features.shape[0]
         self._prepare_data()
-        self._create_trainer(learning_rate, momentum)
+        self._build_network()
         self.learning_rate = learning_rate
         self.momentum = momentum
 
     def _prepare_data(self):
+        self.dataset = split_dataset(self.features, self.weights, self.labels)
         classes = set(self.labels)
-        ds = ClassificationDataSet(self.features.shape[1], 1, nb_classes=len(classes))
-        for i in range(self.sample_size):
-            ds.addSample(self.features.iloc[i], self.labels[i])
-        self.tstdata, self.trndata = ds.splitWithProportion(TEST_DATA_SPLIT)
-        self.tstdata._convertToOneOfMany()
-        self.trndata._convertToOneOfMany()
 
-    def _create_trainer(self, learning_rate, momentum):
+        def training_set():
+            ds = ClassificationDataSet(self.dataset['training']['features'].shape[1], 1, nb_classes=len(classes))
+            for i in range(self.dataset['training']['features'].shape[0]):
+                ds.addSample(self.dataset['training']['features'].iloc[i],
+                             self.dataset['training']['labels'][i])
+            return ds
+
+        def test_set():
+            ds = ClassificationDataSet(self.features.shape[1], 1, nb_classes=len(classes))
+            for i in range(self.dataset['test']['features'].shape[0]):
+                ds.addSample(self.dataset['test']['features'].iloc[i],
+                             self.dataset['test']['labels'][i])
+            return ds
+
+        self.trndata = training_set()
+        self.tstdata = test_set()
+        #self.tstdata, self.trndata = ds.splitWithProportion(TEST_DATA_SPLIT)
+        #self.tstdata._convertToOneOfMany()
+        #self.trndata._convertToOneOfMany()
+
+    def _build_network(self):
         self.fnn = FeedForwardNetwork()
         inLayer = SigmoidLayer(self.trndata.indim)
         hiddenLayer = SigmoidLayer(int(self.trndata.indim * 0.5))
@@ -48,6 +70,7 @@ class NeuralNetwork:
         self.fnn.addConnection(hidden_to_out)
         self.fnn.sortModules()
 
+    def _create_trainer(self, learning_rate, momentum):
         self.trainer = BackpropTrainer(self.fnn, dataset=self.trndata,
                                        momentum=momentum,
                                        verbose=False,
@@ -55,7 +78,11 @@ class NeuralNetwork:
                                        learningrate=learning_rate)
 
     def train(self, train_epoch=5):
+        self._create_trainer(self.learning_rate, self.momentum)
         self.trainer.trainEpochs(train_epoch)
+
+    def learn_weights(self, max_evaluations):
+        return HillClimber(self.tstdata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations).learn()
 
     def predict(self, dataset=None):
         if dataset is None:
@@ -67,6 +94,16 @@ class NeuralNetwork:
         tsterror = percentError(self.trainer.testOnClassData(dataset=self.tstdata), self.tstdata['class'])
         return self.trainer.totalepochs, trnerror, tsterror
 
+    def train_accuracy(self):
+        return accuracy_score(y_pred=self.predict(self.trndata),
+                              y_true=self.trndata['target'],
+                              sample_weight=self.dataset['training']['weights'])
+
+    def test_accuracy(self):
+        return accuracy_score(y_pred=self.predict(self.tstdata),
+                              y_true=self.tstdata['target'],
+                              sample_weight=self.dataset['test']['weights'])
+
 
 def run_neural_net(data, learning_rate=0.1):
     """
@@ -76,6 +113,19 @@ def run_neural_net(data, learning_rate=0.1):
     nn.train()
     nn.predict()
     return nn.estimate_error()
+
+
+def evaluate_hill_climbing(data, max_evaluation_range=xrange(10, 100, 10)):
+    nn = NeuralNetwork(data=data)
+    acc_data = []
+    for max_eval in max_evaluation_range:
+        nn.learn_weights(max_evaluations=max_eval)
+        trnacc = nn.train_accuracy()
+        tstacc = nn.test_accuracy()
+        acc_data.append([max_eval, trnacc, tstacc])
+    return pd.DataFrame.from_records(acc_data,
+                                     columns=['max_evaluations', 'trnacc', 'tstacc'],
+                                     index=['max_evaluations'])
 
 
 def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.001, 0.01, 0.1, 1.0])):
@@ -104,7 +154,7 @@ def plot_accuracy_function(df, smooth_factor=5):
     rows = int(math.ceil(len(lr)/2))
     columns = 2
     fig, axes = plt.subplots(nrows=rows, ncols=columns, figsize=(12, 6), sharex=False, sharey=True)
-    n = 0 # store the counter for retrieving learning rates
+    n = 0  # store the counter for retrieving learning rates
     for r in range(rows):
         for c in range(columns):
             if len(lr) > n:

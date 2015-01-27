@@ -33,14 +33,14 @@ class NeuralNetwork:
         def training_set():
             ds = ClassificationDataSet(self.dataset['training']['features'].shape[1], 1, nb_classes=len(classes))
             for i in range(self.dataset['training']['features'].shape[0]):
-                ds.addSample(self.dataset['training']['features'].iloc[i],
+                ds.addSample(self.dataset['training']['features'][i],
                              self.dataset['training']['labels'][i])
             return ds
 
         def test_set():
             ds = ClassificationDataSet(self.features.shape[1], 1, nb_classes=len(classes))
             for i in range(self.dataset['test']['features'].shape[0]):
-                ds.addSample(self.dataset['test']['features'].iloc[i],
+                ds.addSample(self.dataset['test']['features'][i],
                              self.dataset['test']['labels'][i])
             return ds
 
@@ -113,9 +113,9 @@ def run_neural_net(data, learning_rate=0.1):
 
 
 def evaluate_hill_climbing(data, max_evaluation_range=xrange(10, 100, 10)):
-    nn = NeuralNetwork(data=data)
     acc_data = []
     for max_eval in max_evaluation_range:
+        nn = NeuralNetwork(data=data)
         nn.learn_weights(max_evaluations=max_eval, algoritm=HillClimber)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()
@@ -126,9 +126,9 @@ def evaluate_hill_climbing(data, max_evaluation_range=xrange(10, 100, 10)):
 
 
 def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(10, 100, 10)):
-    nn = NeuralNetwork(data=data)
     acc_data = []
     for max_eval in max_evaluation_range:
+        nn = NeuralNetwork(data=data)
         nn.learn_weights(max_evaluations=max_eval, algoritm=GA)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()

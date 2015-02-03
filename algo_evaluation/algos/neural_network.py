@@ -47,8 +47,8 @@ class NeuralNetwork:
         self.trndata = training_set()
         self.tstdata = test_set()
         #self.tstdata, self.trndata = ds.splitWithProportion(TEST_DATA_SPLIT)
-        #self.tstdata._convertToOneOfMany()
-        #self.trndata._convertToOneOfMany()
+        self.tstdata._convertToOneOfMany()
+        self.trndata._convertToOneOfMany()
 
     def _build_network(self):
         self.fnn = FeedForwardNetwork()
@@ -79,12 +79,14 @@ class NeuralNetwork:
         self.trainer.trainEpochs(train_epoch)
 
     def learn_weights(self, max_evaluations, algoritm):
-        return algoritm(self.tstdata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations).learn()
+        return algoritm(self.trndata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations).learn()
 
     def predict(self, dataset=None):
         if dataset is None:
             dataset = self.tstdata
-        return self.fnn.activateOnDataset(dataset)
+        out = self.fnn.activateOnDataset(dataset)
+        out = out.argmax(axis=1)
+        return out
 
     def estimate_error(self):
         trnerror = percentError(self.trainer.testOnClassData(dataset=self.trndata), self.trndata['class'])
@@ -93,12 +95,12 @@ class NeuralNetwork:
 
     def train_accuracy(self):
         return accuracy_score(y_pred=self.predict(self.trndata),
-                              y_true=self.trndata['target'],
+                              y_true=self.trndata['class'],
                               sample_weight=self.dataset['training']['weights'])
 
     def test_accuracy(self):
         return accuracy_score(y_pred=self.predict(self.tstdata),
-                              y_true=self.tstdata['target'],
+                              y_true=self.tstdata['class'],
                               sample_weight=self.dataset['test']['weights'])
 
 
@@ -112,7 +114,7 @@ def run_neural_net(data, learning_rate=0.1):
     return nn.estimate_error()
 
 
-def evaluate_hill_climbing(data, max_evaluation_range=xrange(10, 100, 10)):
+def evaluate_hill_climbing(data, max_evaluation_range=xrange(1, 20, 1)):
     acc_data = []
     for max_eval in max_evaluation_range:
         nn = NeuralNetwork(data=data)
@@ -125,7 +127,7 @@ def evaluate_hill_climbing(data, max_evaluation_range=xrange(10, 100, 10)):
                                      index=['max_evaluations'])
 
 
-def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(10, 100, 10)):
+def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(1, 20, 1)):
     acc_data = []
     for max_eval in max_evaluation_range:
         nn = NeuralNetwork(data=data)

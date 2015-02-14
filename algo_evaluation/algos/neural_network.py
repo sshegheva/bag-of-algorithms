@@ -1,4 +1,5 @@
 import math
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ from sklearn.metrics import accuracy_score
 from pybrain.datasets import ClassificationDataSet
 from pybrain.utilities import percentError
 from pybrain.supervised.trainers import BackpropTrainer
-from pybrain.optimization import HillClimber
+from pybrain.optimization import HillClimber, StochasticHillClimber
 from pybrain.optimization.populationbased.ga import GA
 from pybrain.structure.modules import SoftmaxLayer
 from pybrain.tools.shortcuts import buildNetwork
@@ -17,7 +18,7 @@ from algo_evaluation.datasets import load_higgs_train, split_dataset
 
 
 class NeuralNetwork:
-    def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=5):
+    def __init__(self, data, learning_rate=0.001, momentum=0.1, n_hidden_units=2):
         self.features, self.weights, labels = data
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
         self._prepare_data()
@@ -99,29 +100,48 @@ def run_neural_net(data, learning_rate=0.1):
     return nn.estimate_error()
 
 
-def evaluate_hill_climbing(data, max_evaluation_range=xrange(1, 20, 1)):
+def evaluate_hill_climbing(data, max_evaluation_range=xrange(1, 100, 10)):
     acc_data = []
     for max_eval in max_evaluation_range:
+        start = time.time()
         nn = NeuralNetwork(data=data)
         nn.learn_weights(max_evaluations=max_eval, algoritm=HillClimber)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()
-        acc_data.append([max_eval, trnacc, tstacc])
+        elapsed = time.time() - start
+        acc_data.append(['hill_climbing', elapsed, max_eval, trnacc, tstacc])
     return pd.DataFrame.from_records(acc_data,
-                                     columns=['max_evaluations', 'trnacc', 'tstacc'],
+                                     columns=['algo', 'time', 'max_evaluations', 'trnacc', 'tstacc'],
                                      index=['max_evaluations'])
 
 
-def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(1, 20, 1)):
+def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(1, 100, 10)):
     acc_data = []
     for max_eval in max_evaluation_range:
+        start = time.time()
         nn = NeuralNetwork(data=data)
         nn.learn_weights(max_evaluations=max_eval, algoritm=GA)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()
-        acc_data.append([max_eval, trnacc, tstacc])
+        elapsed = time.time() - start
+        acc_data.append(['ga', elapsed, max_eval, trnacc, tstacc])
     return pd.DataFrame.from_records(acc_data,
-                                     columns=['max_evaluations', 'trnacc', 'tstacc'],
+                                     columns=['algo', 'time', 'max_evaluations', 'trnacc', 'tstacc'],
+                                     index=['max_evaluations'])
+
+
+def evaluate_simulated_annealing(data, max_evaluation_range=xrange(1, 100, 10)):
+    acc_data = []
+    for max_eval in max_evaluation_range:
+        start = time.time()
+        nn = NeuralNetwork(data=data)
+        nn.learn_weights(max_evaluations=max_eval, algoritm=StochasticHillClimber)
+        trnacc = nn.train_accuracy()
+        tstacc = nn.test_accuracy()
+        elapsed = time.time() - start
+        acc_data.append(['simulated_annealing', elapsed, max_eval, trnacc, tstacc])
+    return pd.DataFrame.from_records(acc_data,
+                                     columns=['algo', 'time', 'max_evaluations', 'trnacc', 'tstacc'],
                                      index=['max_evaluations'])
 
 
@@ -146,8 +166,8 @@ def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.0
     return df
 
 
-def estimate_hidden_units(hidden_units_range=xrange(1, 100)):
-    data = load_higgs_train()
+def estimate_hidden_units(hidden_units_range=xrange(1, 100), sample_size=None):
+    data = load_higgs_train(sample_size=sample_size)
 
     def estimate_error(nn):
         nn.train()
@@ -180,4 +200,24 @@ def plot_accuracy_function(df, smooth_factor=5):
                 else:
                     smooth_df.plot(ax=axes[r][c], title=title)
             n += 1
+
+
+def plot_weight_learning_accuracy(hc_df, ga_df, sa_df):
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
+    df = pd.concat([hc_df, ga_df, sa_df])
+    df.groupby(by='algo')['trnacc'].plot(ax=axes[0],
+                                         legend=True,
+                                         kind='line',
+                                         title='Accuracy f(evaluations)')
+    df.groupby(by='algo')['time'].plot(ax=axes[1],
+                                       legend=True,
+                                       kind='line',
+                                       title='Running time f(evaluations)')
+
+
+def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 10)):
+    hc_df = evaluate_hill_climbing(data, max_evaluation_range)
+    ga_df = evaluate_genetic_algorithm(data, max_evaluation_range)
+    sa_df = evaluate_simulated_annealing(data, max_evaluation_range)
+    return plot_weight_learning_accuracy(hc_df, ga_df, sa_df)
 

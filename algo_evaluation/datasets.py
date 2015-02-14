@@ -20,7 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from algo_evaluation import BIDDING_DATA, HIGGS_DATA, LOGGER, TEST_DATA_SPLIT
+from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, LOGGER, TEST_DATA_SPLIT
 
 
 def describe_higgs_raw():
@@ -98,6 +98,10 @@ def load_bidding_test():
     df = pd.read_csv(BIDDING_DATA['test'])
     LOGGER.info('Loaded higgs test dataset of size %s', len(df))
     return df
+
+
+def load_waldo_dataset():
+    return pd.read_csv(WALDO_DATA)
 
 
 def split_dataset(features, weights, labels):

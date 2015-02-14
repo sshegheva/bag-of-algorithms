@@ -10,21 +10,21 @@ from pybrain.utilities import percentError
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.optimization import HillClimber
 from pybrain.optimization.populationbased.ga import GA
-from pybrain.structure.connections import FullConnection
-from pybrain.structure.modules import SigmoidLayer, SoftmaxLayer
-from pybrain.structure.networks import FeedForwardNetwork
+from pybrain.structure.modules import SoftmaxLayer
+from pybrain.tools.shortcuts import buildNetwork
 
 from algo_evaluation.datasets import load_higgs_train, split_dataset
 
 
 class NeuralNetwork:
-    def __init__(self, data, learning_rate=0.1, momentum=0.1):
+    def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=5):
         self.features, self.weights, labels = data
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
         self._prepare_data()
-        self._build_network()
+        self._build_network(n_hidden_units)
         self.learning_rate = learning_rate
         self.momentum = momentum
+        self.n_hidden_units = n_hidden_units
 
     def _prepare_data(self):
         self.dataset = split_dataset(self.features, self.weights, self.labels)
@@ -46,26 +46,11 @@ class NeuralNetwork:
 
         self.trndata = training_set()
         self.tstdata = test_set()
-        #self.tstdata, self.trndata = ds.splitWithProportion(TEST_DATA_SPLIT)
         self.tstdata._convertToOneOfMany()
         self.trndata._convertToOneOfMany()
 
-    def _build_network(self):
-        self.fnn = FeedForwardNetwork()
-        inLayer = SigmoidLayer(self.trndata.indim)
-        hiddenLayer = SigmoidLayer(int(self.trndata.indim * 0.5))
-        outLayer = SoftmaxLayer(self.trndata.outdim)
-
-        self.fnn.addInputModule(inLayer)
-        self.fnn.addModule(hiddenLayer)
-        self.fnn.addOutputModule(outLayer)
-
-        in_to_hidden = FullConnection(inLayer, hiddenLayer)
-        hidden_to_out = FullConnection(hiddenLayer, outLayer)
-
-        self.fnn.addConnection(in_to_hidden)
-        self.fnn.addConnection(hidden_to_out)
-        self.fnn.sortModules()
+    def _build_network(self, n_hidden_units):
+        self.fnn = buildNetwork(self.trndata.indim, n_hidden_units, self.trndata.outdim, outclass=SoftmaxLayer)
 
     def _create_trainer(self, learning_rate, momentum):
         self.trainer = BackpropTrainer(self.fnn, dataset=self.trndata,
@@ -155,6 +140,23 @@ def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.0
     dfs = [estimate_error(NeuralNetwork(data, l)) for l in learning_rate_range]
 
     df = pd.concat(dfs)
+
+    df['training_accuracy'] = 1 - df['training_error'] / 100
+    df['test_accuracy'] = 1 - df['test_error'] / 100
+    return df
+
+
+def estimate_hidden_units(hidden_units_range=xrange(1, 100)):
+    data = load_higgs_train()
+
+    def estimate_error(nn):
+        nn.train()
+        total_epochs, trn, tst = nn.estimate_error()
+        return [nn.n_hidden_units, total_epochs, trn, tst]
+
+    data = [estimate_error(NeuralNetwork(data, n_hidden_units=l)) for l in hidden_units_range]
+
+    df = pd.DataFrame.from_records(data, columns=['hidden_units', 'iteration', 'training_error', 'test_error'])
 
     df['training_accuracy'] = 1 - df['training_error'] / 100
     df['test_accuracy'] = 1 - df['test_error'] / 100

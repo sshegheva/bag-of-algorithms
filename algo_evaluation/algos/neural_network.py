@@ -15,7 +15,6 @@ from pybrain.structure.modules import SoftmaxLayer
 from pybrain.tools.shortcuts import buildNetwork
 
 from algo_evaluation.datasets import load_higgs_train, split_dataset
-from algo_evaluation import LOGGER
 
 np.random.seed(42)
 
@@ -103,52 +102,40 @@ def run_neural_net(data, learning_rate=0.1):
     return nn.estimate_error()
 
 
-def evaluate_hill_climbing(data, max_evaluation_range=xrange(1, 100, 10)):
+def evaluate_optimization_algorithm(data, algorithm, max_evaluation_range=xrange(1, 100, 10)):
     acc_data = []
     for max_eval in max_evaluation_range:
-        start = time.time()
         nn = NeuralNetwork(data=data)
-        weights = nn.learn_weights(max_evaluations=max_eval, algoritm=HillClimber)
-        #LOGGER.debug('hc %s', weights)
+        start = time.time()
+        nn.learn_weights(max_evaluations=max_eval, algoritm=algorithm)
+        training_elapsed = time.time() - start
         trnacc = nn.train_accuracy()
+        start = time.time()
         tstacc = nn.test_accuracy()
-        elapsed = time.time() - start
-        acc_data.append(['hill_climbing', elapsed, max_eval, trnacc, tstacc])
+        # normalize testing time per record
+        test_elapsed = (time.time() - start) / len(nn.tstdata)
+        acc_data.append([max_eval, training_elapsed, test_elapsed, trnacc, tstacc])
     return pd.DataFrame.from_records(acc_data,
-                                     columns=['algo', 'time', 'max_evaluations', 'trnacc', 'tstacc'],
+                                     columns=['max_evaluations', 'trntime', 'tsttime', 'trnacc', 'tstacc'],
                                      index=['max_evaluations'])
 
 
-def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(1, 100, 10)):
-    acc_data = []
-    for max_eval in max_evaluation_range:
-        start = time.time()
-        nn = NeuralNetwork(data=data)
-        weights = nn.learn_weights(max_evaluations=max_eval, algoritm=GA)
-        #LOGGER.debug('ga %s', weights)
-        trnacc = nn.train_accuracy()
-        tstacc = nn.test_accuracy()
-        elapsed = time.time() - start
-        acc_data.append(['genetic_algorithm', elapsed, max_eval, trnacc, tstacc])
-    return pd.DataFrame.from_records(acc_data,
-                                     columns=['algo', 'time', 'max_evaluations', 'trnacc', 'tstacc'],
-                                     index=['max_evaluations'])
+def evaluate_simulated_annealing(data, max_evaluation_range):
+    df = evaluate_optimization_algorithm(data, StochasticHillClimber, max_evaluation_range)
+    df['algo'] = 'simulated_annealing'
+    return df
 
 
-def evaluate_simulated_annealing(data, max_evaluation_range=xrange(1, 100, 10)):
-    acc_data = []
-    for max_eval in max_evaluation_range:
-        start = time.time()
-        nn = NeuralNetwork(data=data)
-        #weights = nn.learn_weights(max_evaluations=max_eval, algoritm=StochasticHillClimber)
-        LOGGER.debug('sa %s', weights)
-        trnacc = nn.train_accuracy()
-        tstacc = nn.test_accuracy()
-        elapsed = time.time() - start
-        acc_data.append(['simulated_annealing', elapsed, max_eval, trnacc, tstacc])
-    return pd.DataFrame.from_records(acc_data,
-                                     columns=['algo', 'time', 'max_evaluations', 'trnacc', 'tstacc'],
-                                     index=['max_evaluations'])
+def evaluate_hill_climbing(data, max_evaluation_range):
+    df = evaluate_optimization_algorithm(data, HillClimber, max_evaluation_range)
+    df['algo'] = 'hill_climbing'
+    return df
+
+
+def evaluate_genetic_algorithm(data, max_evaluation_range):
+    df = evaluate_optimization_algorithm(data, GA, max_evaluation_range)
+    df['algo'] = 'genetic_algorithm'
+    return df
 
 
 def estimate_training_iterations(n_iterations=10, learning_rate_range=tuple([0.001, 0.01, 0.1, 1.0])):
@@ -208,17 +195,29 @@ def plot_accuracy_function(df, smooth_factor=5):
             n += 1
 
 
-def plot_weight_learning_accuracy(hc_df, ga_df, sa_df, smoothing_factor=5):
+def plot_weight_learning_accuracy(df):
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
-    df = pd.concat([hc_df, ga_df, sa_df])
     df.groupby(by='algo')['trnacc'].plot(ax=axes[0],
                                          legend=True,
                                          kind='line',
                                          title='Accuracy f(evaluations)')
-    df.groupby(by='algo')['time'].plot(ax=axes[1],
-                                       legend=True,
-                                       kind='line',
-                                       title='Running time f(evaluations)')
+    df.groupby(by='algo')['trnacc'].plot(ax=axes[1],
+                                         legend=True,
+                                         kind='kde',
+                                         title='Density of scores per algorithm')
+    return df
+
+
+def plot_weight_learning_time(df):
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
+    df.groupby(by='algo')['trntime'].plot(ax=axes[0],
+                                         legend=True,
+                                         kind='line',
+                                         title='Weights Learning Time')
+    df.groupby(by='algo')['tsttime'].plot(ax=axes[1],
+                                         legend=True,
+                                         kind='line',
+                                         title='Prediction Average Time')
     return df
 
 
@@ -226,5 +225,5 @@ def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 
     hc_df = evaluate_hill_climbing(data, max_evaluation_range)
     ga_df = evaluate_genetic_algorithm(data, max_evaluation_range)
     sa_df = evaluate_simulated_annealing(data, max_evaluation_range)
-    return plot_weight_learning_accuracy(hc_df, ga_df, sa_df)
+    return pd.concat([hc_df, ga_df, sa_df])
 

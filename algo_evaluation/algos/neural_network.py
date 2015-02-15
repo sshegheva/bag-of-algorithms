@@ -15,10 +15,13 @@ from pybrain.structure.modules import SoftmaxLayer
 from pybrain.tools.shortcuts import buildNetwork
 
 from algo_evaluation.datasets import load_higgs_train, split_dataset
+from algo_evaluation import LOGGER
+
+np.random.seed(42)
 
 
 class NeuralNetwork:
-    def __init__(self, data, learning_rate=0.001, momentum=0.1, n_hidden_units=2):
+    def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=2):
         self.features, self.weights, labels = data
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
         self._prepare_data()
@@ -65,7 +68,9 @@ class NeuralNetwork:
         self.trainer.trainEpochs(train_epoch)
 
     def learn_weights(self, max_evaluations, algoritm):
-        return algoritm(self.trndata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations).learn()
+        alg = algoritm(self.trndata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations, verbose=False)
+        alg.minimize = True
+        return alg.learn()
 
     def predict(self, dataset=None):
         if dataset is None:
@@ -81,13 +86,11 @@ class NeuralNetwork:
 
     def train_accuracy(self):
         return accuracy_score(y_pred=self.predict(self.trndata),
-                              y_true=self.trndata['class'],
-                              sample_weight=self.dataset['training']['weights'])
+                              y_true=self.trndata['class'])
 
     def test_accuracy(self):
         return accuracy_score(y_pred=self.predict(self.tstdata),
-                              y_true=self.tstdata['class'],
-                              sample_weight=self.dataset['test']['weights'])
+                              y_true=self.tstdata['class'])
 
 
 def run_neural_net(data, learning_rate=0.1):
@@ -105,7 +108,8 @@ def evaluate_hill_climbing(data, max_evaluation_range=xrange(1, 100, 10)):
     for max_eval in max_evaluation_range:
         start = time.time()
         nn = NeuralNetwork(data=data)
-        nn.learn_weights(max_evaluations=max_eval, algoritm=HillClimber)
+        weights = nn.learn_weights(max_evaluations=max_eval, algoritm=HillClimber)
+        #LOGGER.debug('hc %s', weights)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()
         elapsed = time.time() - start
@@ -120,11 +124,12 @@ def evaluate_genetic_algorithm(data, max_evaluation_range=xrange(1, 100, 10)):
     for max_eval in max_evaluation_range:
         start = time.time()
         nn = NeuralNetwork(data=data)
-        nn.learn_weights(max_evaluations=max_eval, algoritm=GA)
+        weights = nn.learn_weights(max_evaluations=max_eval, algoritm=GA)
+        #LOGGER.debug('ga %s', weights)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()
         elapsed = time.time() - start
-        acc_data.append(['ga', elapsed, max_eval, trnacc, tstacc])
+        acc_data.append(['genetic_algorithm', elapsed, max_eval, trnacc, tstacc])
     return pd.DataFrame.from_records(acc_data,
                                      columns=['algo', 'time', 'max_evaluations', 'trnacc', 'tstacc'],
                                      index=['max_evaluations'])
@@ -135,7 +140,8 @@ def evaluate_simulated_annealing(data, max_evaluation_range=xrange(1, 100, 10)):
     for max_eval in max_evaluation_range:
         start = time.time()
         nn = NeuralNetwork(data=data)
-        nn.learn_weights(max_evaluations=max_eval, algoritm=StochasticHillClimber)
+        #weights = nn.learn_weights(max_evaluations=max_eval, algoritm=StochasticHillClimber)
+        LOGGER.debug('sa %s', weights)
         trnacc = nn.train_accuracy()
         tstacc = nn.test_accuracy()
         elapsed = time.time() - start
@@ -202,7 +208,7 @@ def plot_accuracy_function(df, smooth_factor=5):
             n += 1
 
 
-def plot_weight_learning_accuracy(hc_df, ga_df, sa_df):
+def plot_weight_learning_accuracy(hc_df, ga_df, sa_df, smoothing_factor=5):
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
     df = pd.concat([hc_df, ga_df, sa_df])
     df.groupby(by='algo')['trnacc'].plot(ax=axes[0],
@@ -213,6 +219,7 @@ def plot_weight_learning_accuracy(hc_df, ga_df, sa_df):
                                        legend=True,
                                        kind='line',
                                        title='Running time f(evaluations)')
+    return df
 
 
 def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 10)):

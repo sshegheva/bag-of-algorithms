@@ -15,12 +15,13 @@ Higgs Dataset:
 Bidding Dataset:
 
 """
+import random
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, LOGGER, TEST_DATA_SPLIT
+from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, LOGGER, TEST_DATA_SPLIT
 
 
 def describe_higgs_raw():
@@ -102,6 +103,22 @@ def load_bidding_test():
 
 def load_waldo_dataset():
     return pd.read_csv(WALDO_DATA)
+
+
+def load_mona_lisa(sample_size=1000):
+    n = 100000  #number of records in file
+    header_skip = 6
+    if sample_size is None:
+        skip = []
+    else:
+        skip = list(sorted(random.sample(xrange(header_skip, n), n-sample_size)))
+    df = pd.read_csv(MONA_LISA_DATA,
+                     sep=' ',
+                     skiprows=range(header_skip) + skip,
+                     header=None,
+                     names=['id', 'X', 'Y'],
+                     index_col=0)
+    return df
 
 
 def split_dataset(features, weights, labels):

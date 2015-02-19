@@ -10,6 +10,7 @@
 
 # A demonstration of four methods of solving the Travelling Salesman Problem
 import numpy as np
+import time
 
 
 def make_tsp(n_cities):
@@ -21,6 +22,16 @@ def make_tsp(n_cities):
             distances[i, j] = np.sqrt((positions[i, 0] - positions[j, 0])**2 + (positions[i, 1] - positions[j, 1])**2)
             distances[j, i] = distances[i, j]
 
+    return distances
+
+
+def make_monalisa_tsp(monalisa_df):
+    points = len(monalisa_df) - 1
+    distances = np.zeros((points, points))
+
+    for i in range(points):
+        diff = monalisa_df.iloc[0] - monalisa_df
+        distances[i] = np.sqrt((diff * diff).sum(axis=1)).dropna().values
     return distances
 
 
@@ -82,7 +93,7 @@ def greedy(distances):
     return cityOrder, distanceTravelled
 
 
-def hillClimbing(distances):
+def hillClimbing(distances, n_evaluations=1000):
 
     nCities = np.shape(distances)[0]
 
@@ -94,7 +105,7 @@ def hillClimbing(distances):
         distanceTravelled += distances[cityOrder[i],cityOrder[i+1]]
     distanceTravelled += distances[cityOrder[nCities-1],0]
 
-    for i in range(1000):
+    for i in range(n_evaluations):
         # Choose cities to swap
         city1 = np.random.randint(nCities)
         city2 = np.random.randint(nCities)
@@ -120,7 +131,7 @@ def hillClimbing(distances):
     return cityOrder, distanceTravelled
 
 
-def simulated_annealing(distances):
+def simulated_annealing(distances, T=500, c=0.8, n_evaluations=10):
 
     nCities = np.shape(distances)[0]
 
@@ -130,14 +141,10 @@ def simulated_annealing(distances):
     distanceTravelled = 0
     for i in range(nCities-1):
         distanceTravelled += distances[cityOrder[i],cityOrder[i+1]]
-    distanceTravelled += distances[cityOrder[nCities-1],0]
+    distanceTravelled += distances[cityOrder[nCities-1], 0]
 
-    T = 500
-    c = 0.8
-    nTests = 10
-
-    while T>1:
-        for i in range(nTests):
+    while T > 1:
+        for i in range(n_evaluations):
             # Choose cities to swap
             city1 = np.random.randint(nCities)
             city2 = np.random.randint(nCities)
@@ -161,37 +168,27 @@ def simulated_annealing(distances):
                     cityOrder = possibleCityOrder
 
             # Annealing schedule
-            T = c*T
+            T *= c
 
     return cityOrder, distanceTravelled
 
 
-def run_all():
-    import time
-
-    nCities = 5
-    distances = make_tsp(nCities)
-
-    print "Exhaustive search"
-    start = time.time()
-    print exhaustive(distances)
-    finish = time.time()
-    print finish-start
+def compare_all(optimization_problem):
 
     print "Greedy search"
     start = time.time()
-    print greedy(distances)
+    print greedy(optimization_problem)
     finish = time.time()
     print finish-start
 
     print "Hill Climbing"
     start = time.time()
-    print hillClimbing(distances)
+    print hillClimbing(optimization_problem)
     finish = time.time()
     print finish-start
 
     print "Simulated Annealing"
     start = time.time()
-    print simulated_annealing(distances)
+    print simulated_annealing(optimization_problem)
     finish = time.time()
     print finish-start

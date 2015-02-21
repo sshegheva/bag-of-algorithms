@@ -10,7 +10,8 @@
 
 # A demonstration of four methods of solving the Travelling Salesman Problem
 import numpy as np
-import time
+from scipy.spatial.distance import squareform
+from scipy.spatial.distance import pdist
 
 
 def make_tsp(n_cities):
@@ -26,13 +27,7 @@ def make_tsp(n_cities):
 
 
 def make_monalisa_tsp(monalisa_df):
-    points = len(monalisa_df) - 1
-    distances = np.zeros((points, points))
-
-    for i in range(points):
-        diff = monalisa_df.iloc[0] - monalisa_df
-        distances[i] = np.sqrt((diff * diff).sum(axis=1)).dropna().values
-    return distances
+    return squareform(pdist(monalisa_df[['X', 'Y']]))
 
 
 def exhaustive(distances):
@@ -91,104 +86,3 @@ def greedy(distances):
     distanceTravelled += distances[cityOrder[nCities-1],0]
 
     return cityOrder, distanceTravelled
-
-
-def hillClimbing(distances, n_evaluations=1000):
-
-    nCities = np.shape(distances)[0]
-
-    cityOrder = np.arange(nCities)
-    np.random.shuffle(cityOrder)
-
-    distanceTravelled = 0
-    for i in range(nCities-1):
-        distanceTravelled += distances[cityOrder[i],cityOrder[i+1]]
-    distanceTravelled += distances[cityOrder[nCities-1],0]
-
-    for i in range(n_evaluations):
-        # Choose cities to swap
-        city1 = np.random.randint(nCities)
-        city2 = np.random.randint(nCities)
-
-        if city1 != city2:
-            # Reorder the set of cities
-            possibleCityOrder = cityOrder.copy()
-            possibleCityOrder = np.where(possibleCityOrder==city1,-1,possibleCityOrder)
-            possibleCityOrder = np.where(possibleCityOrder==city2,city1,possibleCityOrder)
-            possibleCityOrder = np.where(possibleCityOrder==-1,city2,possibleCityOrder)
-
-            # Work out the new distances
-            # This can be done more efficiently
-            newDistanceTravelled = 0
-            for j in range(nCities-1):
-                newDistanceTravelled += distances[possibleCityOrder[j],possibleCityOrder[j+1]]
-            distanceTravelled += distances[cityOrder[nCities-1],0]
-
-            if newDistanceTravelled < distanceTravelled:
-                distanceTravelled = newDistanceTravelled
-                cityOrder = possibleCityOrder
-
-    return cityOrder, distanceTravelled
-
-
-def simulated_annealing(distances, T=500, c=0.8, n_evaluations=10):
-
-    nCities = np.shape(distances)[0]
-
-    cityOrder = np.arange(nCities)
-    np.random.shuffle(cityOrder)
-
-    distanceTravelled = 0
-    for i in range(nCities-1):
-        distanceTravelled += distances[cityOrder[i],cityOrder[i+1]]
-    distanceTravelled += distances[cityOrder[nCities-1], 0]
-
-    while T > 1:
-        for i in range(n_evaluations):
-            # Choose cities to swap
-            city1 = np.random.randint(nCities)
-            city2 = np.random.randint(nCities)
-
-            if city1 != city2:
-                # Reorder the set of cities
-                possibleCityOrder = cityOrder.copy()
-                possibleCityOrder = np.where(possibleCityOrder==city1,-1,possibleCityOrder)
-                possibleCityOrder = np.where(possibleCityOrder==city2,city1,possibleCityOrder)
-                possibleCityOrder = np.where(possibleCityOrder==-1,city2,possibleCityOrder)
-
-                # Work out the new distances
-                # This can be done more efficiently
-                newDistanceTravelled = 0
-                for j in range(nCities-1):
-                    newDistanceTravelled += distances[possibleCityOrder[j],possibleCityOrder[j+1]]
-                distanceTravelled += distances[cityOrder[nCities-1],0]
-
-                if newDistanceTravelled < distanceTravelled or (distanceTravelled - newDistanceTravelled) < T*np.log(np.random.rand()):
-                    distanceTravelled = newDistanceTravelled
-                    cityOrder = possibleCityOrder
-
-            # Annealing schedule
-            T *= c
-
-    return cityOrder, distanceTravelled
-
-
-def compare_all(optimization_problem):
-
-    print "Greedy search"
-    start = time.time()
-    print greedy(optimization_problem)
-    finish = time.time()
-    print finish-start
-
-    print "Hill Climbing"
-    start = time.time()
-    print hillClimbing(optimization_problem)
-    finish = time.time()
-    print finish-start
-
-    print "Simulated Annealing"
-    start = time.time()
-    print simulated_annealing(optimization_problem)
-    finish = time.time()
-    print finish-start

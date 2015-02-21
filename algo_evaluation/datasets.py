@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, LOGGER, TEST_DATA_SPLIT
+from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde, plot_waldo_coord
 
 
 def describe_higgs_raw():
@@ -101,11 +102,17 @@ def load_bidding_test():
     return df
 
 
-def load_waldo_dataset():
-    return pd.read_csv(WALDO_DATA)
+def load_waldo_dataset(display=False):
+    df = pd.read_csv(WALDO_DATA)
+    if display:
+        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
+        plot_waldo_coord(df, ax=axes[0])
+        plot_waldo_kde(df, ax=axes[1])
+    return df
 
 
-def load_mona_lisa(sample_size=1000):
+
+def load_mona_lisa(sample_size=1000, display=False):
     n = 100000  #number of records in file
     header_skip = 6
     if sample_size is None:
@@ -118,6 +125,13 @@ def load_mona_lisa(sample_size=1000):
                      header=None,
                      names=['id', 'X', 'Y'],
                      index_col=0)
+    df = df.dropna()
+    if display:
+        df.plot(x='X', y='Y',
+                kind='hexbin',
+                figsize=(6, 4),
+                xticks=[], yticks=[],
+                legend=False)
     return df
 
 

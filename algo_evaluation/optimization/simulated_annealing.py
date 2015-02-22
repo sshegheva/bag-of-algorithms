@@ -45,7 +45,7 @@ def simulated_annealing(distances, T=500, c=0.8, n_evaluations=10):
     return cityOrder, distanceTravelled
 
 
-def evaluate_sa(optimization_problem, evaluation_range=xrange(0, 1000, 1)):
+def evaluate_sa(optimization_problem, evaluation_range=xrange(0, 1000, 100)):
     data = []
     for n in evaluation_range:
         start = time.time()

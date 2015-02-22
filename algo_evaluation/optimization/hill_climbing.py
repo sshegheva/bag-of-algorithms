@@ -41,7 +41,7 @@ def hill_climbing(distances, n_evaluations=1000):
     return cityOrder, distanceTravelled
 
 
-def evaluate_hc(optimization_problem, evaluation_range=xrange(0, 1000, 1)):
+def evaluate_hc(optimization_problem, evaluation_range=xrange(0, 1000, 100)):
     data = []
     for n in evaluation_range:
         start = time.time()

@@ -105,7 +105,7 @@ def load_bidding_test():
 def load_waldo_dataset(display=False):
     df = pd.read_csv(WALDO_DATA)
     if display:
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 6), sharex=False, sharey=True)
+        fig, axes = plt.subplots(nrows=1, ncols=2, sharex=False, sharey=True)
         plot_waldo_coord(df, ax=axes[0])
         plot_waldo_kde(df, ax=axes[1])
     return df

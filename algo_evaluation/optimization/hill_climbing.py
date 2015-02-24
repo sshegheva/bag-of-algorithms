@@ -10,10 +10,10 @@ def hill_climbing(distances, n_evaluations=1000):
     cityOrder = np.arange(nCities)
     np.random.shuffle(cityOrder)
 
-    distanceTravelled = 0
+    cost = 0
     for i in range(nCities-1):
-        distanceTravelled += distances[cityOrder[i],cityOrder[i+1]]
-    distanceTravelled += distances[cityOrder[nCities-1],0]
+        cost += distances[cityOrder[i], cityOrder[i+1]]
+    cost += distances[cityOrder[nCities-1], 0]
 
     for i in range(n_evaluations):
         # Choose cities to swap
@@ -23,22 +23,24 @@ def hill_climbing(distances, n_evaluations=1000):
         if city1 != city2:
             # Reorder the set of cities
             possibleCityOrder = cityOrder.copy()
-            possibleCityOrder = np.where(possibleCityOrder==city1,-1,possibleCityOrder)
-            possibleCityOrder = np.where(possibleCityOrder==city2,city1,possibleCityOrder)
-            possibleCityOrder = np.where(possibleCityOrder==-1,city2,possibleCityOrder)
+            possibleCityOrder = np.where(possibleCityOrder == city1, -1, possibleCityOrder)
+            possibleCityOrder = np.where(possibleCityOrder == city2, city1, possibleCityOrder)
+            possibleCityOrder = np.where(possibleCityOrder == -1, city2, possibleCityOrder)
 
             # Work out the new distances
             # This can be done more efficiently
-            newDistanceTravelled = 0
+            new_cost = 0
             for j in range(nCities-1):
-                newDistanceTravelled += distances[possibleCityOrder[j],possibleCityOrder[j+1]]
-            distanceTravelled += distances[cityOrder[nCities-1],0]
+                new_cost += distances[possibleCityOrder[j], possibleCityOrder[j+1]]
+            new_fitness = 1 / new_cost
+            cost += distances[cityOrder[nCities-1], 0]
+            fitness = 1 / cost
 
-            if newDistanceTravelled < distanceTravelled:
-                distanceTravelled = newDistanceTravelled
+            if new_fitness > fitness:
+                fitness = new_fitness
                 cityOrder = possibleCityOrder
 
-    return cityOrder, distanceTravelled
+    return cityOrder, cost
 
 
 def evaluate_hc(optimization_problem, evaluation_range=xrange(0, 1000, 100)):

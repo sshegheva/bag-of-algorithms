@@ -131,7 +131,8 @@ def run_genetic_algorithm(optimization_problem,
         # Take the 10 shortest Waldo-seeking paths and produce 10 offspring each from them
         new_population = []
         for rank, agent_genome in enumerate(sorted(population_fitness, key=population_fitness.get)[:10]):
-            if (generation % 1000 == 0 or generation == 9999) and rank == 0:
+            #if (generation % 1000 == 0 or generation == 9999) and rank == 0:
+            if rank == 0:
                 fit = population_fitness[agent_genome]
                 data.append([generation, fit, agent_genome])
                 #plot_trajectory(agent_genome)

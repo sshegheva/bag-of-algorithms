@@ -160,6 +160,6 @@ def run_genetic_algorithm(optimization_problem,
 
 def evaluate_ga(waldo_optimization_problem, generations=1000, population_size=100):
 
-    run_genetic_algorithm(optimization_problem=waldo_optimization_problem,
+    return run_genetic_algorithm(optimization_problem=waldo_optimization_problem,
                           generations=generations,
                           population_size=population_size)

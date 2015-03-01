@@ -1,7 +1,10 @@
+import pandas as pd
 import random
+from algo_evaluation.optimization.problems.schedule_problem import schedulecost, people
 
-def geneticoptimize(domain,costf,popsize=50,step=1,
-                    mutprod=0.2,elite=0.2,maxiter=100):
+
+def genetic_optimize(domain,costf,popsize=50,step=1,
+                    mutprob=0.2,elite=0.2,maxiter=100):
   # Mutation Operation
   def mutate(vec):
     i=random.randint(0,len(domain)-1)
@@ -17,6 +20,7 @@ def geneticoptimize(domain,costf,popsize=50,step=1,
 
   # Build the initial population
   pop=[]
+  data = []
   for i in range(popsize):
     vec=[random.randint(domain[i][0],domain[i][1])
          for i in range(len(domain))]
@@ -47,8 +51,13 @@ def geneticoptimize(domain,costf,popsize=50,step=1,
         c1=random.randint(0,topelite)
         c2=random.randint(0,topelite)
         pop.append(crossover(ranked[c1],ranked[c2]))
+    current_best_score = scores[0][0]
+    data.append([popsize, i, current_best_score])
 
-    # Print current best score
-    print scores[0][0]
+  df = pd.DataFrame.from_records(data, columns=['population_size', 'iterations', 'cost'])
+  df['optimal_value'] = 1 / df['cost']
+  return df
 
-  return scores[0][1]
+def evaluate_ga():
+    domain = [(0,8)] * len(people) *2
+    return genetic_optimize(domain, schedulecost)

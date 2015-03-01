@@ -1,63 +1,46 @@
-import numpy as np
+import math
+import random
 import pandas as pd
-import time
+from algo_evaluation.optimization.problems.schedule_problem import schedulecost, people
 
 
-def simulated_annealing(distances, T=500, c=0.8, n_tests=100):
+def simulated_annealing(domain,costf, T=10000.0, cool=0.95, step=1):
+  # Initialize the values randomly
+  vec=[float(random.randint(domain[i][0],domain[i][1]))
+       for i in range(len(domain))]
 
-    nCities = np.shape(distances)[0]
+  data = []
+  while T>0.1:
+    # Choose one of the indices
+    i=random.randint(0,len(domain)-1)
 
-    cityOrder = np.arange(nCities)
-    np.random.shuffle(cityOrder)
+    # Choose a direction to change it
+    dir=random.randint(-step,step)
 
-    cost = 0
-    for i in range(nCities-1):
-        cost += distances[cityOrder[i], cityOrder[i+1]]
-    cost += distances[cityOrder[nCities-1], 0]
+    # Create a new list with one of the values changed
+    vecb=vec[:]
+    vecb[i]+=dir
+    if vecb[i]<domain[i][0]: vecb[i]=domain[i][0]
+    elif vecb[i]>domain[i][1]: vecb[i]=domain[i][1]
 
-    while T > 1:
-        for i in range(n_tests):
-            # Choose cities to swap
-            city1 = np.random.randint(nCities)
-            city2 = np.random.randint(nCities)
+    # Calculate the current cost and the new cost
+    ea=costf(vec)
+    eb=costf(vecb)
+    p=pow(math.e,(-eb-ea)/T)
 
-            if city1 != city2:
-                # Reorder the set of cities
-                possibleCityOrder = cityOrder.copy()
-                possibleCityOrder = np.where(possibleCityOrder==city1,-1,possibleCityOrder)
-                possibleCityOrder = np.where(possibleCityOrder==city2,city1,possibleCityOrder)
-                possibleCityOrder = np.where(possibleCityOrder==-1,city2,possibleCityOrder)
+    # Is it better, or does it make the probability
+    # cutoff?
+    if (eb<ea or random.random()<p):
+      vec=vecb
+    data.append([T, eb])
 
-                # Work out the new distances
-                # This can be done more efficiently
-                new_cost = 0
-                for j in range(nCities-1):
-                    new_cost += distances[possibleCityOrder[j],possibleCityOrder[j+1]]
-                new_fitnes = 1 / new_cost
-                cost += distances[cityOrder[nCities-1], 0]
-                fitness = 1 / cost
-
-                if new_fitnes > fitness or (fitness - new_fitnes) < T*np.log(np.random.rand()):
-                    fitness = new_fitnes
-                    cityOrder = possibleCityOrder
-
-            # Annealing schedule
-            T *= c
-
-    return cityOrder, cost
+    # Decrease the temperature
+    T=T*cool
+  df = pd.DataFrame.from_records(data, columns=['temperature', 'cost'])
+  df['optimal_value'] = 1 / df['cost']
+  return df
 
 
-def evaluate_sa(optimization_problem, tests_range=xrange(10, 1000, 10)):
-    data = []
-
-    def evaluate_temperature(temp):
-        for t in tests_range:
-            start = time.time()
-            solution, optimal_value = simulated_annealing(optimization_problem, T=temp, n_tests=t)
-            elapsed = time.time() - start
-            data.append(['simulated_annealing', t, temp, optimal_value, elapsed])
-        df = pd.DataFrame.from_records(data,
-                                       columns=['algo', 'evaluations', 'temperature', 'optimal_value', 'running_time'])
-        return df
-    dfs = [evaluate_temperature(t) for t in [10, 100, 500, 1000]]
-    return pd.concat(dfs)
+def evaluate_sa():
+    domain = [(0,8)] * len(people) *2
+    return simulated_annealing(domain, schedulecost)

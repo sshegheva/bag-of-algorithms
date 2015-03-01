@@ -1,54 +1,39 @@
-import numpy as np
+import random
 import pandas as pd
-import time
+from algo_evaluation.optimization.problems.schedule_problem import schedulecost, people
 
 
-def hill_climbing(distances, n_evaluations=1000):
+def hillclimb(domain, costf, max_evaluations=1000):
+  # Create a random solution
+  sol=[random.randint(domain[i][0], domain[i][1])
+      for i in range(len(domain))]
+  n_evaluations = 0
+  data = []
+  while n_evaluations < max_evaluations:
+    # Create list of neighboring solutions
+    neighbors=[]
+    for j in range(len(domain)):
+      # One away in each direction
+      if sol[j]>domain[j][0]:
+        neighbors.append(sol[0:j]+[sol[j]+1]+sol[j+1:])
+      if sol[j]<domain[j][1]:
+        neighbors.append(sol[0:j]+[sol[j]-1]+sol[j+1:])
 
-    nCities = np.shape(distances)[0]
-
-    cityOrder = np.arange(nCities)
-    np.random.shuffle(cityOrder)
-
-    cost = 0
-    for i in range(nCities-1):
-        cost += distances[cityOrder[i], cityOrder[i+1]]
-    cost += distances[cityOrder[nCities-1], 0]
-
-    for i in range(n_evaluations):
-        # Choose cities to swap
-        city1 = np.random.randint(nCities)
-        city2 = np.random.randint(nCities)
-
-        if city1 != city2:
-            # Reorder the set of cities
-            possibleCityOrder = cityOrder.copy()
-            possibleCityOrder = np.where(possibleCityOrder == city1, -1, possibleCityOrder)
-            possibleCityOrder = np.where(possibleCityOrder == city2, city1, possibleCityOrder)
-            possibleCityOrder = np.where(possibleCityOrder == -1, city2, possibleCityOrder)
-
-            # Work out the new distances
-            # This can be done more efficiently
-            new_cost = 0
-            for j in range(nCities-1):
-                new_cost += distances[possibleCityOrder[j], possibleCityOrder[j+1]]
-            new_fitness = 1 / new_cost
-            cost += distances[cityOrder[nCities-1], 0]
-            fitness = 1 / cost
-
-            if new_fitness > fitness:
-                fitness = new_fitness
-                cityOrder = possibleCityOrder
-
-    return cityOrder, cost
+    # See what the best solution amongst the neighbors is
+    current=costf(sol)
+    best=current
+    for j in range(len(neighbors)):
+      cost=costf(neighbors[j])
+      if cost<best:
+        best=cost
+        sol=neighbors[j]
+      n_evaluations +=1
+      data.append([n_evaluations, best])
+  df = pd.DataFrame.from_records(data, columns=['evaluations', 'cost'])
+  df['optimal_value'] = 1 / df['cost']
+  return df
 
 
-def evaluate_hc(optimization_problem, evaluation_range=xrange(10, 1000, 10)):
-    data = []
-    for n in evaluation_range:
-        start = time.time()
-        solution, optimal_value = hill_climbing(optimization_problem, n_evaluations=n)
-        elapsed = time.time() - start
-        data.append(['hill_climbing', n, optimal_value, elapsed])
-    df = pd.DataFrame.from_records(data, columns=['algo', 'evaluations', 'optimal_value', 'running_time'])
-    return df
+def evaluate_rhc():
+    domain = [(0,8)] * len(people) *2
+    return hillclimb(domain, schedulecost)

@@ -2,6 +2,7 @@ import math
 import time
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import accuracy_score
@@ -196,29 +197,15 @@ def plot_accuracy_function(df, smooth_factor=5):
 
 
 def plot_weight_learning_accuracy(df):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
-    df.groupby(by='algo')['trnacc'].plot(ax=axes[0],
-                                         legend=True,
-                                         kind='line',
-                                         title='Accuracy f(evaluations)')
-    df.groupby(by='algo')['trnacc'].plot(ax=axes[1],
-                                         legend=True,
-                                         kind='kde',
-                                         title='Density of scores per algorithm')
-    return df
+    sns.lmplot('max_evaluations', 'tstacc', col='algo', hue='algo', data=df.reset_index())
 
 
 def plot_weight_learning_time(df):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
-    df.groupby(by='algo')['trntime'].plot(ax=axes[0],
-                                         legend=True,
-                                         kind='line',
-                                         title='Weights Learning Time')
-    df.groupby(by='algo')['tsttime'].plot(ax=axes[1],
-                                         legend=True,
-                                         kind='line',
-                                         title='Prediction Average Time')
-    return df
+    df = df.reset_index()
+    f, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(12,4))
+    sns.boxplot(df['trntime'], df['algo'], ax=ax_l)
+    sns.boxplot(df['tsttime'], df['algo'], ax=ax_r)
+    plt.tight_layout()
 
 
 def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 10)):

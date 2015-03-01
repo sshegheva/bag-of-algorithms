@@ -24,6 +24,7 @@ HIGGS_DATA = {'training': os.path.join(DATA_PATH, 'training.csv')}
 BIDDING_DATA = {'training': os.path.join(DATA_PATH, 'bidding_training.csv')}
 WALDO_DATA = os.path.join(DATA_PATH, 'whereis-waldo-locations.csv')
 MONA_LISA_DATA = os.path.join(DATA_PATH, 'mona-lisa100k.tsp')
+SCHEDULE_DATA = os.path.join(DATA_PATH, 'schedulle.csv')
 
 # how to split test data from the training data
 TEST_DATA_SPLIT = 0.33

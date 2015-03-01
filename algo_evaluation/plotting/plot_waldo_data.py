@@ -16,8 +16,8 @@ def plot_waldo_coord(waldo_df, ax):
     ax.set_ylabel("")
 
 
-def plot_waldo_kde(waldo_df, ax):
-    plt.figure(figsize=(12.75, 8))
+def plot_waldo_kde(waldo_df):
+    f, ax = plt.figure(figsize=(12.75, 8))
     sb.kdeplot(waldo_df.X, waldo_df.Y, shade=True, cmap="Blues", ax=ax)
     ax.set_xlim(0, 12.75)
     ax.set_ylim(0, 8)

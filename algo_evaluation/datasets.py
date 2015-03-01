@@ -21,8 +21,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, LOGGER, TEST_DATA_SPLIT
-from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde, plot_waldo_coord
+from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT
+from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde
 
 
 def describe_higgs_raw():
@@ -105,12 +105,19 @@ def load_bidding_test():
 def load_waldo_dataset(display=False):
     df = pd.read_csv(WALDO_DATA)
     if display:
-        fig, axes = plt.subplots(nrows=1, ncols=2, sharex=False, sharey=True)
-        plot_waldo_coord(df, ax=axes[0])
-        plot_waldo_kde(df, ax=axes[1])
+        plot_waldo_kde(df)
     return df
 
 
+def load_schedule_dataset(display=False):
+    flights = {}
+    for line in file(SCHEDULE_DATA):
+        origin,dest,depart,arrive,price=line.strip().split(',')
+        flights.setdefault((origin,dest),[])
+
+         # Add details to the list of possible flights
+        flights[(origin,dest)].append((depart,arrive,int(price)))
+    return flights
 
 def load_mona_lisa(sample_size=1000, display=False):
     n = 100000  #number of records in file

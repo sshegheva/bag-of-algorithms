@@ -1,5 +1,8 @@
 import time
 from algo_evaluation.datasets import load_schedule_dataset
+from algo_evaluation.optimization.hill_climbing import hillclimb
+from algo_evaluation.optimization.simulated_annealing import simulated_annealing
+from algo_evaluation.optimization.genetic_optimize import genetic_optimize
 
 
 people = [('Seymour','BOS'),
@@ -61,3 +64,16 @@ def schedulecost(sol):
   if latestarrival>earliestdep: totalprice+=50
 
   return totalprice+totalwait
+
+
+def evaluate_rhc():
+    domain = [(0,8)] * len(people) *2
+    return hillclimb(domain, schedulecost)
+
+def evaluate_sa():
+    domain = [(0,8)] * len(people) *2
+    return simulated_annealing(domain, schedulecost)
+
+def evaluate_ga():
+    domain = [(0,8)] * len(people) *2
+    return genetic_optimize(domain, schedulecost)

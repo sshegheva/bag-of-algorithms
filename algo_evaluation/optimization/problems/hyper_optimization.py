@@ -1,1 +1,4 @@
-from hpsklearn import hyperopt_estimator
+
+"""
+Optimize classifier settings
+"""

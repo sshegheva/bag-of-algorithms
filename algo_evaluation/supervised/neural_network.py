@@ -197,12 +197,13 @@ def plot_accuracy_function(df, smooth_factor=5):
 
 
 def plot_weight_learning_accuracy(df):
+    plt.figure(figsize=(8, 4))
     sns.lmplot('max_evaluations', 'tstacc', col='algo', hue='algo', data=df.reset_index())
 
 
 def plot_weight_learning_time(df):
     df = df.reset_index()
-    f, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(12,4))
+    f, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(8, 4))
     sns.boxplot(df['trntime'], df['algo'], ax=ax_l)
     sns.boxplot(df['tsttime'], df['algo'], ax=ax_r)
     plt.tight_layout()

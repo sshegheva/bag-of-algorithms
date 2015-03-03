@@ -1,6 +1,5 @@
 import random
 import pandas as pd
-from algo_evaluation.optimization.problems.schedule_problem import schedulecost, people
 
 
 def hillclimb(domain, costf, max_evaluations=1000):
@@ -32,8 +31,3 @@ def hillclimb(domain, costf, max_evaluations=1000):
   df = pd.DataFrame.from_records(data, columns=['evaluations', 'cost'])
   df['optimal_value'] = 1 / df['cost']
   return df
-
-
-def evaluate_rhc():
-    domain = [(0,8)] * len(people) *2
-    return hillclimb(domain, schedulecost)

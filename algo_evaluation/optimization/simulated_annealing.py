@@ -1,10 +1,9 @@
 import math
 import random
 import pandas as pd
-from algo_evaluation.optimization.problems.schedule_problem import schedulecost, people
 
 
-def simulated_annealing(domain,costf, T=10000.0, cool=0.95, step=1):
+def simulated_annealing(domain, costf, T=10000.0, cool=0.95, step=1):
   # Initialize the values randomly
   vec=[float(random.randint(domain[i][0],domain[i][1]))
        for i in range(len(domain))]
@@ -39,8 +38,3 @@ def simulated_annealing(domain,costf, T=10000.0, cool=0.95, step=1):
   df = pd.DataFrame.from_records(data, columns=['temperature', 'cost'])
   df['optimal_value'] = 1 / df['cost']
   return df
-
-
-def evaluate_sa():
-    domain = [(0,8)] * len(people) *2
-    return simulated_annealing(domain, schedulecost)

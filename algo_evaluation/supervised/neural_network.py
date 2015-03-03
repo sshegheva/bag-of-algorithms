@@ -123,19 +123,19 @@ def evaluate_optimization_algorithm(data, algorithm, max_evaluation_range=xrange
 
 def evaluate_simulated_annealing(data, max_evaluation_range):
     df = evaluate_optimization_algorithm(data, StochasticHillClimber, max_evaluation_range)
-    df['algo'] = 'simulated_annealing'
+    df['algo'] = 'SA'
     return df
 
 
 def evaluate_hill_climbing(data, max_evaluation_range):
     df = evaluate_optimization_algorithm(data, HillClimber, max_evaluation_range)
-    df['algo'] = 'hill_climbing'
+    df['algo'] = 'RHC'
     return df
 
 
 def evaluate_genetic_algorithm(data, max_evaluation_range):
     df = evaluate_optimization_algorithm(data, GA, max_evaluation_range)
-    df['algo'] = 'genetic_algorithm'
+    df['algo'] = 'GA'
     return df
 
 
@@ -197,19 +197,21 @@ def plot_accuracy_function(df, smooth_factor=5):
 
 
 def plot_weight_learning_accuracy(df):
-    plt.figure(figsize=(8, 4))
-    sns.lmplot('max_evaluations', 'tstacc', col='algo', hue='algo', data=df.reset_index())
+    sns.lmplot('max_evaluations', 'tstacc',
+               col='algo', hue='algo',
+               data=df.reset_index(),
+               size=3.5)
 
 
 def plot_weight_learning_time(df):
     df = df.reset_index()
-    f, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(8, 4))
+    f, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(10, 4))
     sns.boxplot(df['trntime'], df['algo'], ax=ax_l)
     sns.boxplot(df['tsttime'], df['algo'], ax=ax_r)
     plt.tight_layout()
 
 
-def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 10)):
+def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 1000, 10)):
     hc_df = evaluate_hill_climbing(data, max_evaluation_range)
     ga_df = evaluate_genetic_algorithm(data, max_evaluation_range)
     sa_df = evaluate_simulated_annealing(data, max_evaluation_range)

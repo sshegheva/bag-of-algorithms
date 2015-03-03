@@ -36,5 +36,4 @@ def simulated_annealing(domain, costf, T=10000.0, cool=0.95, step=1):
     # Decrease the temperature
     T=T*cool
   df = pd.DataFrame.from_records(data, columns=['temperature', 'cost'])
-  df['optimal_value'] = 1 / df['cost']
   return df

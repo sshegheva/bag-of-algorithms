@@ -73,12 +73,15 @@ def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     rhc = hillclimb(domain=domain,
                     costf=opt_problem.compute_fitness,
                     max_evaluations=experiment_settings['rhc']['max_evaluations'])
+    rhc['optimal_value'] = 1 / rhc['cost']
     sa = simulated_annealing(domain=domain,
                              costf=opt_problem.compute_fitness,
                              T=experiment_settings['sa']['T'])
+    sa['optimal_value'] = 1 / sa['cost']
     ga = genetic_optimize(domain=domain,
                           costf=opt_problem.compute_fitness,
                           maxiter=experiment_settings['ga']['max_iterations'])
+    ga['optimal_value'] = 1 / ga['cost']
     #df = pd.concat([rhc, sa, ga])
     #plot_evaluation(df)
     return rhc, sa, ga

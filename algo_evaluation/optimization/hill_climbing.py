@@ -29,5 +29,4 @@ def hillclimb(domain, costf, max_evaluations=1000):
       n_evaluations +=1
       data.append([n_evaluations, best])
   df = pd.DataFrame.from_records(data, columns=['evaluations', 'cost'])
-  df['optimal_value'] = 1 / df['cost']
   return df

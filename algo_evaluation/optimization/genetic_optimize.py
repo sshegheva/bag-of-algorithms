@@ -53,5 +53,4 @@ def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, 
     data.append([popsize, i, current_best_score])
 
   df = pd.DataFrame.from_records(data, columns=['population_size', 'generation', 'cost'])
-  df['optimal_value'] = 1 / df['cost']
   return df

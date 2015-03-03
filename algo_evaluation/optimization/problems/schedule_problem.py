@@ -68,12 +68,18 @@ def schedulecost(sol):
 
 def evaluate_rhc():
     domain = [(0,8)] * len(people) *2
-    return hillclimb(domain, schedulecost)
+    df = hillclimb(domain, schedulecost)
+    df['optimal_value'] = 1 / df['cost']
+    return df
 
 def evaluate_sa():
     domain = [(0,8)] * len(people) *2
-    return simulated_annealing(domain, schedulecost)
+    df = simulated_annealing(domain, schedulecost)
+    df['optimal_value'] = 1 / df['cost']
+    return df
 
 def evaluate_ga():
     domain = [(0,8)] * len(people) *2
-    return genetic_optimize(domain, schedulecost)
+    df = genetic_optimize(domain, schedulecost)
+    df['optimal_value'] = 1 / df['cost']
+    return df

@@ -211,7 +211,7 @@ def plot_weight_learning_time(df):
     plt.tight_layout()
 
 
-def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 1000, 10)):
+def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 10)):
     hc_df = evaluate_hill_climbing(data, max_evaluation_range)
     ga_df = evaluate_genetic_algorithm(data, max_evaluation_range)
     sa_df = evaluate_simulated_annealing(data, max_evaluation_range)

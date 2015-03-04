@@ -1,6 +1,5 @@
 import pandas as pd
 import random
-import numpy as np
 
 
 def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, maxiter=100):
@@ -8,7 +7,6 @@ def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, 
     def mutate(vec):
         mutation = v
         i = random.randint(0, len(domain)-1)
-        print vec[i], domain[i][0], domain[i][1]
         if random.random() < 0.5 and vec[i] > domain[i][0]:
             mutation = vec[0:i]+[vec[i]-step]+vec[i+1:]
         elif vec[i] < domain[i][1]:

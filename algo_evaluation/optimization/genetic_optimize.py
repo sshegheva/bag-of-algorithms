@@ -2,7 +2,7 @@ import pandas as pd
 import random
 
 
-def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, maxiter=100):
+def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, maxiter=1000):
   # Mutation Operation
     def mutate(vec):
         mutation = v

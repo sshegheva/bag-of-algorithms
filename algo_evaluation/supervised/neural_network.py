@@ -18,6 +18,7 @@ from pybrain.tools.shortcuts import buildNetwork
 from algo_evaluation.datasets import load_higgs_train, split_dataset, normalize_features
 
 np.random.seed(42)
+sns.set_context(rc={'lines.markeredgewidth': 0.1})
 
 
 class NeuralNetwork:

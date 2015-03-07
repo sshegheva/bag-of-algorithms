@@ -7,9 +7,9 @@ from algo_evaluation.optimization.genetic_optimize import genetic_optimize
 from algo_evaluation.optimization import mimic
 
 DEFAULT_EXPERIMENT_SETTINGS = dict()
-DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'max_evaluations': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'max_iterations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'max_evaluations': 10000}
+DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 10000}
+DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'max_iterations': 10000}
 
 
 class WaldoOpt:
@@ -71,9 +71,6 @@ def plot_evaluation(df):
 def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     opt_problem = WaldoOpt(waldo_df)
     domain = opt_problem.domain
-
-    m = mimic.Mimic(domain, opt_problem.compute_fitness, samples=100)
-    """
     rhc = hillclimb(domain=domain,
                     costf=opt_problem.compute_fitness,
                     max_evaluations=experiment_settings['rhc']['max_evaluations'])
@@ -83,16 +80,4 @@ def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     ga = genetic_optimize(domain=domain,
                           costf=opt_problem.compute_fitness,
                           maxiter=experiment_settings['ga']['max_iterations'])
-    """
-    for i in xrange(25):
-        # print np.average([sum(sample) for sample in m.fit()[:5]])
-        m.fit()
-        results = m.fit()
-        print results
-    #df = pd.concat([rhc, sa, ga])
-    #plot_evaluation(df)
-    return
-
-from algo_evaluation.datasets import load_waldo_dataset
-waldo_df = load_waldo_dataset(display=False)
-compare_all(waldo_df)
+    return rhc, sa, ga

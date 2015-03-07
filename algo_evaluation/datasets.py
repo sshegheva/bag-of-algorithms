@@ -19,6 +19,7 @@ import random
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT
@@ -57,7 +58,6 @@ def describe_higgs_raw():
     return df
 
 
-
 def load_higgs_train(sample_size=None):
     """
     Load higgs dataset
@@ -77,6 +77,12 @@ def load_higgs_train(sample_size=None):
     weights = df['Weight']
     labels = df['Label']
     return features, weights, labels
+
+
+def normalize_features(features):
+    #normalized_features = preprocessing.normalize(features)
+    standardized_features = preprocessing.scale(features)
+    return standardized_features
 
 
 def load_higgs_test():

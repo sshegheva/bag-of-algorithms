@@ -15,20 +15,21 @@ from pybrain.optimization.populationbased.ga import GA
 from pybrain.structure.modules import SoftmaxLayer
 from pybrain.tools.shortcuts import buildNetwork
 
-from algo_evaluation.datasets import load_higgs_train, split_dataset
+from algo_evaluation.datasets import load_higgs_train, split_dataset, normalize_features
 
 np.random.seed(42)
 
 
 class NeuralNetwork:
-    def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=2):
+    def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=5):
         self.features, self.weights, labels = data
+        self.features = normalize_features(self.features)
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
-        self._prepare_data()
-        self._build_network(n_hidden_units)
         self.learning_rate = learning_rate
         self.momentum = momentum
         self.n_hidden_units = n_hidden_units
+        self._prepare_data()
+        self._build_network(n_hidden_units)
 
     def _prepare_data(self):
         self.dataset = split_dataset(self.features, self.weights, self.labels)

@@ -31,8 +31,8 @@ def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, 
 
     # Main loop
     for i in range(maxiter):
-        scores = [(costf(v), v) for v in pop]
-        scores.sort()
+        scores = [(-1 * costf(v), v) for v in pop]
+        scores.sort(reverse=True)
         ranked=[v for (s,v) in scores]
 
         # Start with the pure winners
@@ -55,5 +55,5 @@ def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, 
         current_best_score = scores[0][0]
         data.append([popsize, i, current_best_score])
 
-    df = pd.DataFrame.from_records(data, columns=['population_size', 'generation', 'cost'])
+    df = pd.DataFrame.from_records(data, columns=['population_size', 'generation', 'optimal_value'])
     return df

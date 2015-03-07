@@ -4,6 +4,7 @@ import seaborn as sns
 from algo_evaluation.optimization.hill_climbing import hillclimb
 from algo_evaluation.optimization.simulated_annealing import simulated_annealing
 from algo_evaluation.optimization.genetic_optimize import genetic_optimize
+from algo_evaluation.optimization import mimic
 
 DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'max_evaluations': 1000}
@@ -70,18 +71,28 @@ def plot_evaluation(df):
 def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     opt_problem = WaldoOpt(waldo_df)
     domain = opt_problem.domain
+
+    m = mimic.Mimic(domain, opt_problem.compute_fitness, samples=100)
+    """
     rhc = hillclimb(domain=domain,
                     costf=opt_problem.compute_fitness,
                     max_evaluations=experiment_settings['rhc']['max_evaluations'])
-    rhc['optimal_value'] = 1 / rhc['cost']
     sa = simulated_annealing(domain=domain,
                              costf=opt_problem.compute_fitness,
                              T=experiment_settings['sa']['T'])
-    sa['optimal_value'] = 1 / sa['cost']
     ga = genetic_optimize(domain=domain,
                           costf=opt_problem.compute_fitness,
                           maxiter=experiment_settings['ga']['max_iterations'])
-    ga['optimal_value'] = 1 / ga['cost']
+    """
+    for i in xrange(25):
+        # print np.average([sum(sample) for sample in m.fit()[:5]])
+        m.fit()
+        results = m.fit()
+        print results
     #df = pd.concat([rhc, sa, ga])
     #plot_evaluation(df)
-    return rhc, sa, ga
+    return
+
+from algo_evaluation.datasets import load_waldo_dataset
+waldo_df = load_waldo_dataset(display=False)
+compare_all(waldo_df)

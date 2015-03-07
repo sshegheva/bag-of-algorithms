@@ -10,6 +10,7 @@ from sklearn.cross_validation import cross_val_score
 from algo_evaluation.optimization.hill_climbing import hillclimb
 from algo_evaluation.optimization.simulated_annealing import simulated_annealing
 from algo_evaluation.optimization.genetic_optimize import genetic_optimize
+from algo_evaluation.optimization.mimic import Mimic
 
 DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'max_evaluations': 1000}
@@ -33,6 +34,14 @@ class ClassifierOptimization:
         scores = cross_val_score(clf, self.features, self.labels, cv=10)
         mean_score = scores.mean()
         return 1 - mean_score
+
+
+def baseline_dt(data):
+    features, labels = data
+    clf = DecisionTreeClassifier()
+    scores = cross_val_score(clf, features, labels, cv=10)
+    mean_score = scores.mean()
+    return 1 - mean_score
 
 
 def plot_evaluation(df):

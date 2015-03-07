@@ -19,14 +19,14 @@ def hillclimb(domain, costf, max_evaluations=1000):
         neighbors.append(sol[0:j]+[sol[j]-1]+sol[j+1:])
 
     # See what the best solution amongst the neighbors is
-    current=costf(sol)
-    best=current
+    current = -1 * costf(sol)
+    best = current
     for j in range(len(neighbors)):
-      cost=costf(neighbors[j])
-      if cost<best:
+      cost = -1 * costf(neighbors[j])
+      if cost > best:
         best=cost
         sol=neighbors[j]
       n_evaluations +=1
       data.append([n_evaluations, best])
-  df = pd.DataFrame.from_records(data, columns=['evaluations', 'cost'])
+  df = pd.DataFrame.from_records(data, columns=['evaluations', 'optimal_value'])
   return df

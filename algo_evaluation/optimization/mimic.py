@@ -1,6 +1,3 @@
-"""
-shamelessly copied from mimicry
-"""
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,15 +9,37 @@ np.set_printoptions(precision=4)
 
 
 class Mimic(object):
+    """
+    Usage: from mimicry import Mimic
+
+    :param domain: list of tuples containing the min and max value for each parameter to be optimized, for a bit
+    string, this would be [(0, 1)]*bit_string_length
+
+    :param fitness_function: callable that will take a single instance of your optimization parameters and return
+    a scalar fitness score
+
+    :param samples: Number of samples to generate from the distribution each iteration
+
+    :param percentile: Percentile of the distribution to keep after each iteration, default is 0.90
+
+    """
+
     def __init__(self, domain, fitness_function, samples=1000, percentile=0.90):
+
         self.domain = domain
         self.samples = samples
         initial_samples = np.array(self._generate_initial_samples())
-        self.sample_set = SampleSet(initial_samples, fitness_function)
+        self.sample_set = SampleSet(initial_samples, fitness_function, maximize=False)
         self.fitness_function = fitness_function
         self.percentile = percentile
 
     def fit(self):
+        """
+        Run this to perform one iteration of the Mimic algorithm
+
+        :return: A list containing the top percentile of data points
+        """
+
         samples = self.sample_set.get_percentile(self.percentile)
         self.distribution = Distribution(samples)
         self.sample_set = SampleSet(
@@ -65,13 +84,14 @@ class Distribution(object):
         self._generate_bayes_net()
 
     def generate_samples(self, number_to_generate):
+        root = 0
         sample_len = len(self.bayes_net.node)
         samples = np.zeros((number_to_generate, sample_len))
-        values = self.bayes_net.node[0]["probabilities"].keys()
-        probabilities = self.bayes_net.node[0]["probabilities"].values()
+        values = self.bayes_net.node[root]["probabilities"].keys()
+        probabilities = self.bayes_net.node[root]["probabilities"].values()
         dist = stats.rv_discrete(name="dist", values=(values, probabilities))
         samples[:, 0] = dist.rvs(size=number_to_generate)
-        for parent, current in self.bayes_net.edges_iter():
+        for parent, current in nx.bfs_edges(self.bayes_net, root):
             for i in xrange(number_to_generate):
                 parent_val = samples[i, parent]
                 current_node = self.bayes_net.node[current]
@@ -122,6 +142,7 @@ class Distribution(object):
             for parent_val in unique_parents:
                 parent_inds = np.argwhere(parent_array == parent_val)
                 sub_child = child_array[parent_inds]
+
 
                 child_probs = np.histogram(sub_child,
                                            (np.max(sub_child)+1),

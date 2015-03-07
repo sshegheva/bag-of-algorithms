@@ -17,11 +17,7 @@ def plot_waldo_coord(waldo_df, ax):
 
 
 def plot_waldo_kde(waldo_df):
-    f, ax = plt.subplots(figsize=(12.75, 8))
-    sb.kdeplot(waldo_df.X, waldo_df.Y, shade=True, cmap="Blues", ax=ax)
-    ax.set_xlim(0, 12.75)
-    ax.set_ylim(0, 8)
-    ax.set_xlabel("")
-    ax.set_ylabel("")
-    ax.set_xticks([])
-    ax.set_yticks([])
+    plt.figure(figsize=(5, 3))
+    sb.kdeplot(waldo_df.X, waldo_df.Y, shade=True, cmap="summer")
+    plt.xlabel("")
+    plt.ylabel("")

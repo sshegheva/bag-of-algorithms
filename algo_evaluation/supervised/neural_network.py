@@ -69,9 +69,11 @@ class NeuralNetwork:
         self.trainer.trainEpochs(train_epoch)
 
     def learn_weights(self, max_evaluations, algoritm):
-        alg = algoritm(self.trndata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations, verbose=False)
-        alg.minimize = True
-        return alg.learn()
+        alg = algoritm(self.trndata.evaluateModuleMSE, self.fnn,
+                       verbose=False,
+                       minimize=True)
+        for i in range(max_evaluations):
+            self.fnn = alg.learn(0)[0]
 
     def predict(self, dataset=None):
         if dataset is None:

@@ -7,13 +7,13 @@ from algo_evaluation.optimization.genetic_optimize import genetic_optimize
 from algo_evaluation.optimization import mimic
 
 DEFAULT_EXPERIMENT_SETTINGS = dict()
-DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 100}
+DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 100}
+DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 100}
 
 
 class CronSchedule:
-    def __init__(self, n_jobs=10, n_resources=4):
+    def __init__(self, n_jobs=100, n_resources=10):
         self.n_jobs = n_jobs
         self.n_resources = n_resources
         self.hour_range = (0.0, 23.0)
@@ -34,7 +34,8 @@ class CronSchedule:
         return df
 
     def time_overlap(self, start_1, end_1, start_2, end_2):
-        return max(0, min(end_1, end_2) - max(start_1, start_2))
+        overlap = max(0, min(end_1, end_2) - max(start_1, start_2))
+        return overlap
 
     def total_resources(self, job_1_id, job_2_id):
         return (self.cron_tasks_df.iloc[job_1_id] & self.cron_tasks_df.iloc[job_2_id]).sum()
@@ -52,7 +53,9 @@ class CronSchedule:
             end_1 = start_1 + float(self.cron_tasks_df.iloc[index]['time']) / 60
             start_2 = hour_2 + (min_2 / 60)
             end_2 = start_2 + float(self.cron_tasks_df.iloc[index-1]['time']) / 60
-            solution_fitness += self.total_resources(index, index-1) * self.time_overlap(start_1, end_1, start_2, end_2)
+            resources = self.total_resources(index, index-1)
+            overlap = self.time_overlap(start_1, end_1, start_2, end_2)
+            solution_fitness += -1 * resources * overlap
         return solution_fitness
 
 

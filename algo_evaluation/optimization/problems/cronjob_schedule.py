@@ -9,16 +9,19 @@ from algo_evaluation.optimization import mimic
 DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 100}
 
 
 class CronSchedule:
-    def __init__(self, n_jobs=100, n_resources=10):
+    def __init__(self, n_jobs=50, n_resources=10, names=False):
         self.n_jobs = n_jobs
         self.n_resources = n_resources
         self.hour_range = (0.0, 23.0)
         self.minute_range = (0.0, 59.0)
         self.cron_tasks_df = self.create_toy_schedule()
+        if names:
+            self.cron_tasks_df.rename(columns={x: 'resource_' + str(x) for x in range(self.n_resources)}, inplace=True)
+            self.cron_tasks_df.rename(index={x: 'job_' + str(x) for x in range(self.n_jobs)}, inplace=True)
         self.domain = self.create_domain()
 
     def create_domain(self):

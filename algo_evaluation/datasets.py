@@ -58,7 +58,7 @@ def describe_higgs_raw():
     return df
 
 
-def load_higgs_train(sample_size=None):
+def load_higgs_train(sample_size=None, verbose=True):
     """
     Load higgs dataset
 
@@ -76,6 +76,11 @@ def load_higgs_train(sample_size=None):
     features = derived_df[derived_features_names]
     weights = df['Weight']
     labels = df['Label']
+    if verbose:
+        print 'Size of the dataset:', features.shape[0]
+        print 'Number of features:', features.shape[1]
+        print 'Number of positives (signal):', labels.value_counts()['s']
+        print 'Number of negatives (background):', labels.value_counts()['b']
     return features, weights, labels
 
 

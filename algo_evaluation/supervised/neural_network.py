@@ -204,7 +204,7 @@ def plot_weight_learning_accuracy(df):
     sns.lmplot('max_evaluations', 'tstacc',
                col='algo', hue='algo',
                data=df.reset_index(),
-               size=3.5)
+               size=4)
 
 
 def plot_weight_learning_time(df):

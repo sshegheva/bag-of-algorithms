@@ -53,7 +53,7 @@ def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, 
                 cross = crossover(ranked[c1], ranked[c2])
                 pop.append(cross)
         current_best_score = scores[0][0]
-        data.append([popsize, i, current_best_score])
+        data.append([popsize, i, current_best_score, pop])
 
-    df = pd.DataFrame.from_records(data, columns=['population_size', 'generations', 'optimal_value'])
+    df = pd.DataFrame.from_records(data, columns=['population_size', 'generations', 'optimal_value', 'population'])
     return df

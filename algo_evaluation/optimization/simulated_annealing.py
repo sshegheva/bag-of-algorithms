@@ -28,12 +28,12 @@ def simulated_annealing(domain, costf, T=10000.0, cool=0.99, step=1):
     rd = random.random()
     if (energy_after < energy_before) or (rd < p):
       vec=vecb
-      data.append([T, energy_after])
+      data.append([T, energy_after, vec])
     else:
-      data.append([T, energy_before])
+      data.append([T, energy_before, vec])
 
     # Decrease the temperature
     T *= cool
-  df = pd.DataFrame.from_records(data, columns=['temperature', 'cost'])
+  df = pd.DataFrame.from_records(data, columns=['temperature', 'cost', 'solution'])
   df['optimal_value'] = -1 * df['cost']
   return df

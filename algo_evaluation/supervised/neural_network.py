@@ -215,6 +215,14 @@ def plot_weight_learning_time(df):
     plt.tight_layout()
 
 
+def plot_improvement(df_nn, baseline):
+    summary_nn = df_nn.groupby('algo').max()
+    summary_nn['backprob_tstacc'] = baseline
+    summary_nn['improvement'] = 100 * (summary_nn['tstacc'] - summary_nn['backprob_tstacc'])/ summary_nn['backprob_tstacc']
+    summary_nn['improvement'].plot(kind='barh', figsize=(8, 2),
+                                   title='Accuracy Improvement (%): Weight Learning vs\n Backpropagation')
+
+
 def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 10)):
     hc_df = evaluate_hill_climbing(data, max_evaluation_range)
     ga_df = evaluate_genetic_algorithm(data, max_evaluation_range)

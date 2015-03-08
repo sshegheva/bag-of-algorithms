@@ -13,7 +13,7 @@ from algo_evaluation.optimization.genetic_optimize import genetic_optimize
 from algo_evaluation.optimization.mimic import Mimic
 
 DEFAULT_EXPERIMENT_SETTINGS = dict()
-DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 10}
+DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
 

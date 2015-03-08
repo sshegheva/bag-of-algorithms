@@ -4,6 +4,7 @@ Optimize classifier settings
 """
 import seaborn as sns
 import matplotlib.pyplot as plt
+from algo_evaluation.optimization.problems.plot_optimal_values import plot_optimal_values
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.cross_validation import cross_val_score
 from algo_evaluation.optimization.hill_climbing import hillclimb
@@ -68,14 +69,3 @@ def compare_all(data, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     ga.set_index('generations', inplace=True)
     ga['optimal_value'] += 1
     return rhc, sa, ga
-
-
-def plot_optimal_values(rhc_df, sa_df, ga_df):
-    f, ax = plt.subplots(2, 2, figsize=(10,8))
-    rhc_df.plot(title='Hill Climber', ax=ax[0][0], legend=False, sharex=False)
-    ax[0][0].set_ylabel("optimal value")
-    sa_df.plot(title='Simulated Annealing', logx=True, ax=ax[0][1], legend=False, sharex=False)
-    ax[0][1].set_ylabel("optimal value")
-    ga_df.plot(title='Genetic Algorithm', ax=ax[1][0], legend=False, sharex=False)
-    ax[1][0].set_ylabel("optimal value")
-    plt.tight_layout()

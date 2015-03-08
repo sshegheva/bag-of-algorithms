@@ -1,6 +1,7 @@
 import math
 import seaborn as sns
 import matplotlib.pyplot as plt
+from algo_evaluation.optimization.problems.plot_optimal_values import plot_optimal_values
 from algo_evaluation.optimization.hill_climbing import hillclimb
 from algo_evaluation.optimization.simulated_annealing import simulated_annealing
 from algo_evaluation.optimization.genetic_optimize import genetic_optimize
@@ -83,16 +84,4 @@ def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
                           costf=opt_problem.compute_fitness,
                           maxiter=experiment_settings['ga']['generations'])
     ga.set_index('generations', inplace=True)
-    ga.drop('population_size', inplace=True, axis=1)
     return rhc, sa, ga
-
-
-def plot_optimal_values(rhc_df, sa_df, ga_df):
-    f, ax = plt.subplots(2, 2, figsize=(10,8))
-    rhc_df['optimal_value'].plot(title='Hill Climber', ax=ax[0][0], legend=False, sharex=False)
-    ax[0][0].set_ylabel("optimal value")
-    sa_df['optimal_value'].plot(title='Simulated Annealing', logx=True, ax=ax[0][1], legend=False, sharex=False)
-    ax[0][1].set_ylabel("optimal value")
-    ga_df['optimal_value'].plot(title='Genetic Algorithm', ax=ax[1][0], legend=False, sharex=False)
-    ax[1][0].set_ylabel("optimal value")
-    plt.tight_layout()

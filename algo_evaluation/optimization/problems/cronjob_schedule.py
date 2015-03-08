@@ -7,9 +7,9 @@ from algo_evaluation.optimization.genetic_optimize import genetic_optimize
 from algo_evaluation.optimization import mimic
 
 DEFAULT_EXPERIMENT_SETTINGS = dict()
-DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 100}
-DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 100}
-DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 100}
+DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
 
 
 class CronSchedule:

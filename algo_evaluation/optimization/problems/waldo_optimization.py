@@ -11,6 +11,7 @@ DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['mm'] = {'evaluations': 1000}
 
 
 class WaldoOpt:
@@ -22,13 +23,13 @@ class WaldoOpt:
     def create_waldo_lookup(self):
         loc_map = {}
         for i, record in self.waldo_df.iterrows():
-            key = "B%dP%d" % (record.Book, record.Page)
+            key = "B%dP%d" % (record.Book-1, record.Page-1)
             loc_map[key] = (record.X, record.Y)
         return loc_map
 
     def waldo_domain(self):
-        min_book, max_book = 1.0, 7.0
-        min_page, max_page = 1.0, 12.0
+        min_book, max_book = 0.0, 6.0
+        min_page, max_page = 0.0, 11.0
         domain = []
         for i in range(len(self.waldo_df)):
             domain.append((min_book, max_book))
@@ -84,4 +85,7 @@ def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
                           costf=opt_problem.compute_fitness,
                           maxiter=experiment_settings['ga']['generations'])
     ga.set_index('generations', inplace=True)
-    return rhc, sa, ga
+    mm = mimic.run_mimic(domain=domain,
+                         fitness_function=opt_problem.compute_fitness,
+                         evaluations=experiment_settings['mm']['evaluations'])
+    return rhc, sa, ga, mm

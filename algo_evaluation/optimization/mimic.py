@@ -1,7 +1,8 @@
 import networkx as nx
-import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import random
+import operator
 from scipy import stats
 from sklearn.metrics import mutual_info_score
 
@@ -29,7 +30,7 @@ class Mimic(object):
         self.domain = domain
         self.samples = samples
         initial_samples = np.array(self._generate_initial_samples())
-        self.sample_set = SampleSet(initial_samples, fitness_function, maximize=False)
+        self.sample_set = SampleSet(initial_samples, fitness_function)
         self.fitness_function = fitness_function
         self.percentile = percentile
 
@@ -40,7 +41,8 @@ class Mimic(object):
         :return: A list containing the top percentile of data points
         """
 
-        samples = self.sample_set.get_percentile(self.percentile)
+        sample_fit_pairs = self.sample_set.get_percentile(self.percentile)
+        samples = [s for s,f in sample_fit_pairs]
         self.distribution = Distribution(samples)
         self.sample_set = SampleSet(
             self.distribution.generate_samples(self.samples),
@@ -57,18 +59,15 @@ class Mimic(object):
 
 
 class SampleSet(object):
-    def __init__(self, samples, fitness_function, maximize=True):
+    def __init__(self, samples, fitness_function, maximize=False):
         self.samples = samples
         self.fitness_function = fitness_function
         self.maximize = maximize
 
     def calculate_fitness(self):
-        sorted_samples = sorted(
-            self.samples,
-            key=self.fitness_function,
-            reverse=self.maximize,
-        )
-        return np.array(sorted_samples)
+        fitnesses = [(sample, self.fitness_function(sample)) for sample in self.samples]
+        sorted_samples = sorted(fitnesses, key=operator.itemgetter(1), reverse=self.maximize)
+        return sorted_samples
 
     def get_percentile(self, percentile):
         fit_samples = self.calculate_fitness()
@@ -174,36 +173,12 @@ class Distribution(object):
         return complete_graph
 
 
-if __name__ == "__main__":
-    samples = [
-        [1, 0, 0, 1],
-        [1, 0, 1, 1],
-        [0, 1, 1, 0],
-        [0, 1, 1, 1],
-        [0, 1, 1, 0],
-        [1, 0, 1, 1],
-        [1, 0, 0, 0],
-    ]
+def run_mimic(domain, fitness_function, evaluations=1000):
+    m = Mimic(domain, fitness_function)
+    data = []
+    for n in xrange(evaluations):
+        results = m.fit()[0]
+        [data.append([n, solution, optimal_value]) for solution, optimal_value in results]
 
-    distribution = Distribution(samples)
-
-    distribution._generate_bayes_net()
-
-    for node_ind in distribution.bayes_net.nodes():
-            print(distribution.bayes_net.node[node_ind])
-
-    pos = nx.spring_layout(distribution.spanning_graph)
-
-    edge_labels = dict(
-        [((u, v,), d['weight'])
-         for u, v, d in distribution.spanning_graph.edges(data=True)]
-    )
-
-    nx.draw_networkx(distribution.spanning_graph, pos)
-    nx.draw_networkx_edge_labels(
-        distribution.spanning_graph,
-        pos,
-        edge_labels=edge_labels,
-    )
-
-    plt.show()
+    df = pd.DataFrame(data, columns=['iteration', 'solution', 'optimal_value'])
+    return df

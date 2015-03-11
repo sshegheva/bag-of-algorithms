@@ -25,7 +25,7 @@ class Mimic(object):
 
     """
 
-    def __init__(self, domain, fitness_function, samples=1000, percentile=0.90):
+    def __init__(self, domain, fitness_function, samples=50, percentile=0.90):
 
         self.domain = domain
         self.samples = samples
@@ -42,7 +42,7 @@ class Mimic(object):
         """
 
         sample_fit_pairs = self.sample_set.get_percentile(self.percentile)
-        samples = [s for s,f in sample_fit_pairs]
+        samples = [s for s, f in sample_fit_pairs]
         self.distribution = Distribution(samples)
         self.sample_set = SampleSet(
             self.distribution.generate_samples(self.samples),
@@ -181,4 +181,5 @@ def run_mimic(domain, fitness_function, evaluations=10):
         [data.append([n, solution, optimal_value]) for solution, optimal_value in results]
 
     df = pd.DataFrame(data, columns=['iteration', 'solution', 'optimal_value'])
+    df['optimal_value'] *= -1
     return df

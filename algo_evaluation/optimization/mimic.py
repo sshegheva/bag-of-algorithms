@@ -173,11 +173,11 @@ class Distribution(object):
         return complete_graph
 
 
-def run_mimic(domain, fitness_function, evaluations=1000):
+def run_mimic(domain, fitness_function, evaluations=10):
     m = Mimic(domain, fitness_function)
     data = []
     for n in xrange(evaluations):
-        results = m.fit()[0]
+        results = m.fit()
         [data.append([n, solution, optimal_value]) for solution, optimal_value in results]
 
     df = pd.DataFrame(data, columns=['iteration', 'solution', 'optimal_value'])

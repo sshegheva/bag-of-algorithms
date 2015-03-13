@@ -3,6 +3,7 @@
 Optimize classifier settings
 """
 import seaborn as sns
+import time
 import matplotlib.pyplot as plt
 from algo_evaluation.optimization.problems.plot_optimal_values import plot_optimal_values
 from sklearn.tree import DecisionTreeClassifier
@@ -53,19 +54,25 @@ def plot_evaluation(df):
 def compare_all(data, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     opt_problem = ClassifierOptimization(data)
     domain = opt_problem.domain
+    start = time.time()
     rhc = hillclimb(domain=domain,
                     costf=opt_problem.compute_classification_error,
                     max_evaluations=experiment_settings['rhc']['evaluations'])
     rhc['optimal_value'] += 1
+    rhc['time'] = time.time() - start
     rhc.set_index('evaluations', inplace=True)
+    start = time.time()
     sa = simulated_annealing(domain=domain,
                              costf=opt_problem.compute_classification_error,
                              T=experiment_settings['sa']['T'])
     sa.set_index('temperature', inplace=True)
     sa['optimal_value'] += 1
+    sa['time'] = time.time() - start
+    start = time.time()
     ga = genetic_optimize(domain=domain,
                           costf=opt_problem.compute_classification_error,
                           maxiter=experiment_settings['ga']['generations'])
     ga.set_index('generations', inplace=True)
     ga['optimal_value'] += 1
+    ga['time'] = time.time() - start
     return rhc, sa, ga

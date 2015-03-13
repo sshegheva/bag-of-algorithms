@@ -1,5 +1,6 @@
 import math
 import seaborn as sns
+import time
 import matplotlib.pyplot as plt
 from algo_evaluation.optimization.problems.plot_optimal_values import plot_optimal_values
 from algo_evaluation.optimization.hill_climbing import hillclimb
@@ -74,19 +75,29 @@ def plot_evaluation(df):
 def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     opt_problem = WaldoOpt(waldo_df)
     domain = opt_problem.domain
+    start = time.time()
     rhc = hillclimb(domain=domain,
                     costf=opt_problem.compute_fitness,
                     max_evaluations=experiment_settings['rhc']['evaluations'])
+    rhc['time'] = time.time() - start
     rhc.set_index('evaluations', inplace=True)
+    start = time.time()
     sa = simulated_annealing(domain=domain,
                              costf=opt_problem.compute_fitness,
                              T=experiment_settings['sa']['T'])
+    sa['time'] = time.time() - start
     sa.set_index('temperature', inplace=True)
+    start = time.time()
     ga = genetic_optimize(domain=domain,
                           costf=opt_problem.compute_fitness,
                           maxiter=experiment_settings['ga']['generations'])
+    ga['time'] = time.time() - start
     ga.set_index('generations', inplace=True)
+    start = time.time()
+    """
     mm = mimic.run_mimic(domain=domain,
                          fitness_function=opt_problem.compute_fitness,
                          evaluations=experiment_settings['mm']['evaluations'])
-    return rhc, sa, ga, mm
+    mimic['time'] = time.time() - start
+    """
+    return rhc, sa, ga, None

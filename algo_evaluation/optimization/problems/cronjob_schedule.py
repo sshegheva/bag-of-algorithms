@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import time
 from algo_evaluation.optimization.problems.plot_optimal_values import plot_optimal_values
 from algo_evaluation.optimization.hill_climbing import hillclimb
 from algo_evaluation.optimization.simulated_annealing import simulated_annealing
@@ -65,16 +66,22 @@ class CronSchedule:
 def compare_all(experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     opt_problem = CronSchedule()
     domain = opt_problem.domain
+    start = time.time()
     rhc = hillclimb(domain=domain,
                     costf=opt_problem.compute_fitness,
                     max_evaluations=experiment_settings['rhc']['evaluations'])
     rhc.set_index('evaluations', inplace=True)
+    rhc['time'] = time.time() - start
+    start = time.time()
     sa = simulated_annealing(domain=domain,
                              costf=opt_problem.compute_fitness,
                              T=experiment_settings['sa']['T'])
     sa.set_index('temperature', inplace=True)
+    sa['time'] = time.time() - start
+    start = time.time()
     ga = genetic_optimize(domain=domain,
                           costf=opt_problem.compute_fitness,
                           maxiter=experiment_settings['ga']['generations'])
     ga.set_index('generations', inplace=True)
+    ga['time'] = time.time() - start
     return rhc, sa, ga

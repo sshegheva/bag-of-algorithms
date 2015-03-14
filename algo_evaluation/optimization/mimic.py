@@ -94,14 +94,15 @@ class Distribution(object):
             for i in xrange(number_to_generate):
                 parent_val = samples[i, parent]
                 current_node = self.bayes_net.node[current]
-                cond_dist = current_node["probabilities"][int(parent_val)]
-                values = cond_dist.keys()
-                probabilities = cond_dist.values()
-                dist = stats.rv_discrete(
-                    name="dist",
-                    values=(values, probabilities)
-                )
-                samples[i, current] = dist.rvs()
+                if parent_val in current_node['probabilities']:
+                    cond_dist = current_node["probabilities"][int(parent_val)]
+                    values = cond_dist.keys()
+                    probabilities = cond_dist.values()
+                    dist = stats.rv_discrete(
+                        name="dist",
+                        values=(values, probabilities)
+                    )
+                    samples[i, current] = dist.rvs()
 
         return samples
 
@@ -126,13 +127,11 @@ class Distribution(object):
         for parent, child in self.bayes_net.edges():
 
             parent_array = samples[:, parent]
-
             # Check if node is root
             if not self.bayes_net.predecessors(parent):
-                parent_probs = np.histogram(parent_array,
-                                            (np.max(parent_array)+1),
-                                            )[0] / float(parent_array.shape[0])
-
+                bins = np.max(parent_array)+1
+                hist = np.histogram(parent_array, bins=bins)
+                parent_probs = hist[0] / float(parent_array.shape[0])
                 self.bayes_net.node[parent]["probabilities"] = dict(enumerate(parent_probs))
 
             child_array = samples[:, child]
@@ -141,11 +140,9 @@ class Distribution(object):
             for parent_val in unique_parents:
                 parent_inds = np.argwhere(parent_array == parent_val)
                 sub_child = child_array[parent_inds]
-
-
-                child_probs = np.histogram(sub_child,
-                                           (np.max(sub_child)+1),
-                                           )[0] / float(sub_child.shape[0])
+                bins = np.max(sub_child)+1
+                hist = np.histogram(sub_child, bins=bins)
+                child_probs = hist[0] / float(sub_child.shape[0])
 
                 # If P(0) = 1 then child_probs = [1.]
                 # must append zeros to ensure output consistency

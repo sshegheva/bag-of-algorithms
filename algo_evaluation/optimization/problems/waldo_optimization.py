@@ -13,7 +13,7 @@ DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['mm'] = {'evaluations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['mm'] = {'evaluations': 100}    # slowest algorithm
 
 
 class WaldoOpt:
@@ -94,10 +94,8 @@ def compare_all(waldo_df, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     ga['time'] = time.time() - start
     ga.set_index('generations', inplace=True)
     start = time.time()
-    """
     mm = mimic.run_mimic(domain=domain,
                          fitness_function=opt_problem.compute_fitness,
                          evaluations=experiment_settings['mm']['evaluations'])
-    mimic['time'] = time.time() - start
-    """
-    return rhc, sa, ga, None
+    mm['time'] = time.time() - start
+    return rhc, sa, ga, mm

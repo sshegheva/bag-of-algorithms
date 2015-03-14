@@ -15,12 +15,15 @@ Higgs Dataset:
 Bidding Dataset:
 
 """
+import random
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, LOGGER, TEST_DATA_SPLIT
+from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT
+from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde
 
 
 def describe_higgs_raw():
@@ -55,8 +58,7 @@ def describe_higgs_raw():
     return df
 
 
-
-def load_higgs_train(sample_size=None):
+def load_higgs_train(sample_size=None, verbose=True):
     """
     Load higgs dataset
 
@@ -74,7 +76,18 @@ def load_higgs_train(sample_size=None):
     features = derived_df[derived_features_names]
     weights = df['Weight']
     labels = df['Label']
+    if verbose:
+        print 'Size of the dataset:', features.shape[0]
+        print 'Number of features:', features.shape[1]
+        print 'Number of positives (signal):', labels.value_counts()['s']
+        print 'Number of negatives (background):', labels.value_counts()['b']
     return features, weights, labels
+
+
+def normalize_features(features):
+    #normalized_features = preprocessing.normalize(features)
+    standardized_features = preprocessing.scale(features)
+    return standardized_features
 
 
 def load_higgs_test():
@@ -100,8 +113,44 @@ def load_bidding_test():
     return df
 
 
-def load_waldo_dataset():
-    return pd.read_csv(WALDO_DATA)
+def load_waldo_dataset(display=False):
+    df = pd.read_csv(WALDO_DATA)
+    if display:
+        plot_waldo_kde(df)
+    return df
+
+
+def load_schedule_dataset(display=False):
+    flights = {}
+    for line in file(SCHEDULE_DATA):
+        origin,dest,depart,arrive,price=line.strip().split(',')
+        flights.setdefault((origin,dest),[])
+
+         # Add details to the list of possible flights
+        flights[(origin,dest)].append((depart,arrive,int(price)))
+    return flights
+
+def load_mona_lisa(sample_size=1000, display=False):
+    n = 100000  #number of records in file
+    header_skip = 6
+    if sample_size is None:
+        skip = []
+    else:
+        skip = list(sorted(random.sample(xrange(header_skip, n), n-sample_size)))
+    df = pd.read_csv(MONA_LISA_DATA,
+                     sep=' ',
+                     skiprows=range(header_skip) + skip,
+                     header=None,
+                     names=['id', 'X', 'Y'],
+                     index_col=0)
+    df = df.dropna()
+    if display:
+        df.plot(x='X', y='Y',
+                kind='hexbin',
+                figsize=(6, 4),
+                xticks=[], yticks=[],
+                legend=False)
+    return df
 
 
 def split_dataset(features, weights, labels):

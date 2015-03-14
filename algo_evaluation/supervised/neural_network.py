@@ -2,6 +2,7 @@ import math
 import time
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import accuracy_score
@@ -14,20 +15,22 @@ from pybrain.optimization.populationbased.ga import GA
 from pybrain.structure.modules import SoftmaxLayer
 from pybrain.tools.shortcuts import buildNetwork
 
-from algo_evaluation.datasets import load_higgs_train, split_dataset
+from algo_evaluation.datasets import load_higgs_train, split_dataset, normalize_features
 
 np.random.seed(42)
+sns.set_context(rc={'lines.markeredgewidth': 0.1})
 
 
 class NeuralNetwork:
-    def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=2):
+    def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=5):
         self.features, self.weights, labels = data
+        self.features = normalize_features(self.features)
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
-        self._prepare_data()
-        self._build_network(n_hidden_units)
         self.learning_rate = learning_rate
         self.momentum = momentum
         self.n_hidden_units = n_hidden_units
+        self._prepare_data()
+        self._build_network(n_hidden_units)
 
     def _prepare_data(self):
         self.dataset = split_dataset(self.features, self.weights, self.labels)
@@ -67,9 +70,12 @@ class NeuralNetwork:
         self.trainer.trainEpochs(train_epoch)
 
     def learn_weights(self, max_evaluations, algoritm):
-        alg = algoritm(self.trndata.evaluateModuleMSE, self.fnn, maxEvaluations=max_evaluations, verbose=False)
-        alg.minimize = True
-        return alg.learn()
+        alg = algoritm(self.trndata.evaluateModuleMSE, self.fnn,
+                       verbose=False,
+                       minimize=True,
+                       maxEvaluations=max_evaluations)
+        for i in range(max_evaluations):
+            self.fnn = alg.learn(0)[0]
 
     def predict(self, dataset=None):
         if dataset is None:
@@ -122,19 +128,19 @@ def evaluate_optimization_algorithm(data, algorithm, max_evaluation_range=xrange
 
 def evaluate_simulated_annealing(data, max_evaluation_range):
     df = evaluate_optimization_algorithm(data, StochasticHillClimber, max_evaluation_range)
-    df['algo'] = 'simulated_annealing'
+    df['algo'] = 'SA'
     return df
 
 
 def evaluate_hill_climbing(data, max_evaluation_range):
     df = evaluate_optimization_algorithm(data, HillClimber, max_evaluation_range)
-    df['algo'] = 'hill_climbing'
+    df['algo'] = 'RHC'
     return df
 
 
 def evaluate_genetic_algorithm(data, max_evaluation_range):
     df = evaluate_optimization_algorithm(data, GA, max_evaluation_range)
-    df['algo'] = 'genetic_algorithm'
+    df['algo'] = 'GA'
     return df
 
 
@@ -196,29 +202,26 @@ def plot_accuracy_function(df, smooth_factor=5):
 
 
 def plot_weight_learning_accuracy(df):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
-    df.groupby(by='algo')['trnacc'].plot(ax=axes[0],
-                                         legend=True,
-                                         kind='line',
-                                         title='Accuracy f(evaluations)')
-    df.groupby(by='algo')['trnacc'].plot(ax=axes[1],
-                                         legend=True,
-                                         kind='kde',
-                                         title='Density of scores per algorithm')
-    return df
+    sns.lmplot('max_evaluations', 'tstacc',
+               col='algo', hue='algo',
+               data=df.reset_index(),
+               size=4)
 
 
 def plot_weight_learning_time(df):
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), sharex=False, sharey=False)
-    df.groupby(by='algo')['trntime'].plot(ax=axes[0],
-                                         legend=True,
-                                         kind='line',
-                                         title='Weights Learning Time')
-    df.groupby(by='algo')['tsttime'].plot(ax=axes[1],
-                                         legend=True,
-                                         kind='line',
-                                         title='Prediction Average Time')
-    return df
+    df = df.reset_index()
+    f, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(10, 4))
+    sns.boxplot(df['trntime'], df['algo'], ax=ax_l)
+    sns.boxplot(df['tsttime'], df['algo'], ax=ax_r)
+    plt.tight_layout()
+
+
+def plot_improvement(df_nn, baseline):
+    summary_nn = df_nn.groupby('algo').max()
+    summary_nn['backprob_tstacc'] = baseline
+    summary_nn['improvement'] = 100 * (summary_nn['tstacc'] - summary_nn['backprob_tstacc'])/ summary_nn['backprob_tstacc']
+    summary_nn['improvement'].plot(kind='barh', figsize=(7, 2),
+                                   title='Accuracy Improvement (%): Weight Learning vs\n Backpropagation')
 
 
 def compare_weight_learning_optimized(data, max_evaluation_range=xrange(1, 100, 10)):

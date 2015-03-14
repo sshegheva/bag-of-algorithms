@@ -1,4 +1,7 @@
 #!/bin/bash
-ipython nbconvert --to latex --post PDF analysis/notebooks/Supervised\ Classification.ipynb
-ipython nbconvert --to latex --post PDF analysis/notebooks/RandomizedOptimization.ipynb
-#pdflatex
+cd analysis/notebooks
+ipython nbconvert --to latex Supervised\ Classification.ipynb
+pdflatex Supervised\ Classification.tex
+ipython nbconvert --to latex RandomizedOptimization.ipynb
+pdflatex RandomizedOptimization.tex
+

@@ -21,9 +21,14 @@ DEFAULT_EXPERIMENT_SETTINGS['mm'] = {'evaluations': 100}
 class ClassifierOptimization:
     def __init__(self, data):
         self.features, _, self.labels = data
-        self.max_depth_range = (10, 100)
-        self.min_samples_split_range = (2, 50)
-        self.min_samples_leaf_range = (1, 10)
+        # domain is specified starting from zero, need to adjust when submitting to
+        # fitness function
+        self.max_depth_range = (0, 100)
+        self.min_max_depth_value = 10
+        self.min_samples_split_range = (0, 50)
+        self.min_min_samples_value = 2
+        self.min_samples_leaf_range = (0, 10)
+        self.min_min_samples_leaf_value = 1
         self.domain = self.create_domain()
 
     def create_domain(self):
@@ -31,6 +36,9 @@ class ClassifierOptimization:
 
     def compute_classification_error(self, solution):
         md, ms, msl = solution
+        md += self.min_max_depth_value
+        ms += self.min_min_samples_value
+        msl += self.min_min_samples_leaf_value
         clf = DecisionTreeClassifier(max_depth=md, min_samples_split=ms, min_samples_leaf=msl)
         scores = cross_val_score(clf, self.features, self.labels, cv=5)
         mean_score = scores.mean()

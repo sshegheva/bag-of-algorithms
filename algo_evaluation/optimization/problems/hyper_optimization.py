@@ -26,9 +26,9 @@ class ClassifierOptimization:
         self.max_depth_range = (0, 100)
         self.min_max_depth_value = 10
         self.min_samples_split_range = (0, 50)
-        self.min_min_samples_value = 2
+        self.min_min_samples_value = 3
         self.min_samples_leaf_range = (0, 10)
-        self.min_min_samples_leaf_value = 1
+        self.min_min_samples_leaf_value = 2
         self.domain = self.create_domain()
 
     def create_domain(self):

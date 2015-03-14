@@ -1,5 +1,8 @@
 import pandas as pd
+import numpy as np
 import random
+
+np.random.seed(42)
 
 
 def genetic_optimize(domain, costf, popsize=50, step=1, mutprob=0.2, elite=0.2, maxiter=1000):

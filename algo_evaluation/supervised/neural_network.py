@@ -72,7 +72,8 @@ class NeuralNetwork:
     def learn_weights(self, max_evaluations, algoritm):
         alg = algoritm(self.trndata.evaluateModuleMSE, self.fnn,
                        verbose=False,
-                       minimize=True)
+                       minimize=True,
+                       maxEvaluations=max_evaluations)
         for i in range(max_evaluations):
             self.fnn = alg.learn(0)[0]
 

@@ -4,19 +4,17 @@ Optimize classifier settings
 """
 import seaborn as sns
 import time
-import matplotlib.pyplot as plt
-from algo_evaluation.optimization.problems.plot_optimal_values import plot_optimal_values
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.cross_validation import cross_val_score
 from algo_evaluation.optimization.hill_climbing import hillclimb
 from algo_evaluation.optimization.simulated_annealing import simulated_annealing
 from algo_evaluation.optimization.genetic_optimize import genetic_optimize
-from algo_evaluation.optimization.mimic import Mimic
+from algo_evaluation.optimization import mimic
 
 DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 100}
 
 
 class ClassifierOptimization:
@@ -75,4 +73,10 @@ def compare_all(data, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
     ga.set_index('generations', inplace=True)
     ga['optimal_value'] += 1
     ga['time'] = time.time() - start
+    start = time.time()
+    mm = mimic.run_mimic(domain=domain,
+                         fitness_function=opt_problem.compute_classification_error,
+                         evaluations=experiment_settings['mm']['evaluations'])
+    mm['optimal_value'] += 1
+    mm['time'] = time.time() - start
     return rhc, sa, ga

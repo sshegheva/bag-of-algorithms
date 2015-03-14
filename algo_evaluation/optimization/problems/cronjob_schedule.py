@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import time
-from algo_evaluation.optimization.problems.plot_optimal_values import plot_optimal_values
 from algo_evaluation.optimization.hill_climbing import hillclimb
 from algo_evaluation.optimization.simulated_annealing import simulated_annealing
 from algo_evaluation.optimization.genetic_optimize import genetic_optimize
@@ -11,6 +10,7 @@ DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 100}
+DEFAULT_EXPERIMENT_SETTINGS['mm'] = {'evaluations': 100}
 
 
 class CronSchedule:
@@ -84,4 +84,9 @@ def compare_all(experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
                           maxiter=experiment_settings['ga']['generations'])
     ga.set_index('generations', inplace=True)
     ga['time'] = time.time() - start
-    return rhc, sa, ga
+    start = time.time()
+    mm = mimic.run_mimic(domain=domain,
+                         fitness_function=opt_problem.compute_fitness,
+                         evaluations=experiment_settings['mm']['evaluations'])
+    mm['time'] = time.time() - start
+    return rhc, sa, ga, mm

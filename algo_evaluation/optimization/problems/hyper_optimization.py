@@ -14,7 +14,8 @@ from algo_evaluation.optimization import mimic
 DEFAULT_EXPERIMENT_SETTINGS = dict()
 DEFAULT_EXPERIMENT_SETTINGS['rhc'] = {'evaluations': 1000}
 DEFAULT_EXPERIMENT_SETTINGS['sa'] = {'T': 1000}
-DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 100}
+DEFAULT_EXPERIMENT_SETTINGS['ga'] = {'generations': 1000}
+DEFAULT_EXPERIMENT_SETTINGS['mm'] = {'evaluations': 100}
 
 
 class ClassifierOptimization:
@@ -79,4 +80,4 @@ def compare_all(data, experiment_settings=DEFAULT_EXPERIMENT_SETTINGS):
                          evaluations=experiment_settings['mm']['evaluations'])
     mm['optimal_value'] += 1
     mm['time'] = time.time() - start
-    return rhc, sa, ga
+    return rhc, sa, ga, mm

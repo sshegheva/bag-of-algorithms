@@ -205,7 +205,7 @@ def plot_weight_learning_accuracy(df):
     sns.lmplot('max_evaluations', 'tstacc',
                col='algo', hue='algo',
                data=df.reset_index(),
-               size=5)
+               size=4)
 
 
 def plot_weight_learning_time(df):
@@ -220,7 +220,7 @@ def plot_improvement(df_nn, baseline):
     summary_nn = df_nn.groupby('algo').max()
     summary_nn['backprob_tstacc'] = baseline
     summary_nn['improvement'] = 100 * (summary_nn['tstacc'] - summary_nn['backprob_tstacc'])/ summary_nn['backprob_tstacc']
-    summary_nn['improvement'].plot(kind='barh', figsize=(8, 2),
+    summary_nn['improvement'].plot(kind='barh', figsize=(7, 2),
                                    title='Accuracy Improvement (%): Weight Learning vs\n Backpropagation')
 
 

@@ -1,2 +1,2 @@
     \usepackage{setspace}
-    \doublespacing
+    \onehalfspacing

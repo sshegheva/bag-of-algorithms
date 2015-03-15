@@ -15,7 +15,7 @@ from pybrain.optimization.populationbased.ga import GA
 from pybrain.structure.modules import SoftmaxLayer
 from pybrain.tools.shortcuts import buildNetwork
 
-from algo_evaluation.datasets import load_higgs_train, split_dataset, normalize_features
+from algo_evaluation.datasets import load_higgs_train, split_dataset, scale_features
 
 np.random.seed(42)
 sns.set_context(rc={'lines.markeredgewidth': 0.1})
@@ -24,7 +24,7 @@ sns.set_context(rc={'lines.markeredgewidth': 0.1})
 class NeuralNetwork:
     def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=5):
         self.features, self.weights, labels = data
-        self.features = normalize_features(self.features)
+        self.features = scale_features(self.features)
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
         self.learning_rate = learning_rate
         self.momentum = momentum

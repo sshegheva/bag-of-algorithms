@@ -84,7 +84,7 @@ def load_higgs_train(sample_size=None, verbose=True):
     return features, weights, labels
 
 
-def normalize_features(features):
+def scale_features(features):
     #normalized_features = preprocessing.normalize(features)
     standardized_features = preprocessing.scale(features)
     return standardized_features

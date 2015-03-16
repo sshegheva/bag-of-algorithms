@@ -25,7 +25,6 @@ METRIC_NAMES = ['inertia', 'homogeneity', 'completeness', 'v_measure', 'ARI', 'A
 def bench_k_means(estimator, name, data, sample_size):
     features, weights, labels = data
     features = scale(features)
-    t0 = time()
     estimator.fit(features)
     scores = [estimator.inertia_,
               metrics.homogeneity_score(labels, estimator.labels_),
@@ -37,6 +36,15 @@ def bench_k_means(estimator, name, data, sample_size):
     df = pd.Series(data=scores, index=METRIC_NAMES)
     df.name = name
     return df
+
+
+def estimate_n_clusters(data, maximum_clusters):
+    dfs = []
+    for n in range(2, maximum_clusters):
+        estimator = KMeans(init='k-means++', n_clusters=n, n_init=10)
+        df = bench_k_means(estimator=estimator, name='kmeans++', data=data, sample_size=300)
+        dfs.append(df)
+    return pd.concat(dfs)
 
 """
 

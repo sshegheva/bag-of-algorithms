@@ -58,7 +58,7 @@ def describe_higgs_raw():
     return df
 
 
-def load_higgs_train(sample_size=None, verbose=True, scale=False):
+def load_higgs_train(sample_size=None, verbose=True, scale=False, prune_features=True):
     """
     Load higgs dataset
 
@@ -71,9 +71,12 @@ def load_higgs_train(sample_size=None, verbose=True, scale=False):
     df = df.replace(-999.000, np.nan).dropna()
     df.set_index('EventId', inplace=True)
     columns = df.columns
-    derived_features_names = [f for f in columns if f.startswith('DER')]
-    derived_df = df[derived_features_names]
-    features = derived_df[derived_features_names]
+    if prune_features:
+        derived_features_names = [f for f in columns if f.startswith('DER')]
+        derived_df = df[derived_features_names]
+        features = derived_df[derived_features_names]
+    else:
+        features = df[columns[:-2]]
     weights = df['Weight']
     labels = df['Label']
     if scale:

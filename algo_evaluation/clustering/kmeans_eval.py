@@ -19,12 +19,11 @@ from sklearn.preprocessing import scale
 
 np.random.seed(42)
 
-METRIC_NAMES = ['inertia', 'homogeneity', 'completeness', 'v_measure', 'ARI', 'AMI', 'silhouette']
+METRIC_NAMES = ['homogeneity', 'completeness', 'v_measure', 'ARI', 'AMI', 'silhouette']
 
 
 def bench_k_means(estimator, name, data, sample_size):
     features, weights, labels = data
-    features = scale(features)
     estimator.fit(features)
     scores = [estimator.inertia_,
               metrics.homogeneity_score(labels, estimator.labels_),
@@ -35,16 +34,26 @@ def bench_k_means(estimator, name, data, sample_size):
               metrics.silhouette_score(features, estimator.labels_, metric='euclidean', sample_size=sample_size)]
     df = pd.Series(data=scores, index=METRIC_NAMES)
     df.name = name
+    df = pd.DataFrame(df)
+    df.index.name = 'metric'
     return df
+
+
+def evaluate_k_means(estimator, features, labels, metric):
+    t0 = time()
+    estimator.fit(features)
+    elapsed = time() - t0
+    return metric(labels, estimator.labels_), elapsed
 
 
 def estimate_n_clusters(data, maximum_clusters):
     dfs = []
-    for n in range(2, maximum_clusters):
+    for n in range(2, maximum_clusters + 1):
         estimator = KMeans(init='k-means++', n_clusters=n, n_init=10)
         df = bench_k_means(estimator=estimator, name='kmeans++', data=data, sample_size=300)
+        df['cluster'] = n
         dfs.append(df)
-    return pd.concat(dfs)
+    return pd.concat(dfs).reset_index().set_index(['metric', 'clusters'])
 
 """
 

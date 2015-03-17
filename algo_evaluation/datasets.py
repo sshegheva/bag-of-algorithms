@@ -58,7 +58,7 @@ def describe_higgs_raw():
     return df
 
 
-def load_higgs_train(sample_size=None, verbose=True):
+def load_higgs_train(sample_size=None, verbose=True, scale=False):
     """
     Load higgs dataset
 
@@ -76,6 +76,8 @@ def load_higgs_train(sample_size=None, verbose=True):
     features = derived_df[derived_features_names]
     weights = df['Weight']
     labels = df['Label']
+    if scale:
+        features = preprocessing.scale(features)
     if verbose:
         print 'Size of the dataset:', features.shape[0]
         print 'Number of features:', features.shape[1]
@@ -96,7 +98,7 @@ def load_higgs_test():
     return df
 
 
-def load_bidding_train():
+def load_bidding_train(verbose=True):
     df = pd.read_csv(BIDDING_DATA['training'], low_memory=False).dropna()
     features = df[df.columns.tolist()[:-1]]
     le = LabelEncoder()
@@ -104,6 +106,13 @@ def load_bidding_train():
     transformed_df = pd.DataFrame.from_records(transformed).transpose()
     labels = df['class']
     weights = np.ones(len(labels))
+    if verbose:
+        print 'Size of the dataset:', transformed_df.shape[0]
+        print 'Number of features:', transformed_df.shape[1]
+        print 'Number of converters:', labels.value_counts()['converter']
+        print 'Number of non-converters:', labels.value_counts()['non-converter']
+        print 'Number of leads:', labels.value_counts()['lead']
+
     return transformed_df, weights, labels
 
 

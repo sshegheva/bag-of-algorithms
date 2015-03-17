@@ -15,11 +15,15 @@ from sklearn import metrics
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-from sklearn.preprocessing import scale
-
-np.random.seed(42)
 
 METRIC_NAMES = ['homogeneity', 'completeness', 'v_measure', 'ARI', 'AMI', 'silhouette']
+
+higgs_estimators = {'k_means_higgs_2': KMeans(n_clusters=2),
+                    'k_means_higgs_8': KMeans(n_clusters=8)}
+
+bid_estimators = {'k_means_converters_2': KMeans(n_clusters=2),
+                  'k_means_converters_3': KMeans(n_clusters=3),
+                  'k_means_converters_8': KMeans(n_clusters=8)}
 
 
 def bench_k_means(estimator, name, data, sample_size):
@@ -39,11 +43,23 @@ def bench_k_means(estimator, name, data, sample_size):
     return df
 
 
-def evaluate_k_means(estimator, features, labels, metric):
+def evaluate_k_means_generic(estimator, data, metric):
     t0 = time()
+    features, _, labels = data
     estimator.fit(features)
     elapsed = time() - t0
     return metric(labels, estimator.labels_), elapsed
+
+
+def evaluate_k_means(data, estimators):
+    records = []
+    for name, estimator in estimators.items():
+        score, elapsed_time = evaluate_k_means_generic(estimator=estimator,
+                                                       data=data,
+                                                       metric=metrics.v_measure_score)
+        records.append([name, score, elapsed_time])
+    df = pd.DataFrame.from_records(records, columns=['estimator', 'v-measure', 'time'])
+    return df
 
 
 def estimate_n_clusters(data, maximum_clusters):

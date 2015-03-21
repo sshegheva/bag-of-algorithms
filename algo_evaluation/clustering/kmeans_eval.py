@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.cross_validation import cross_val_score
 
 
 METRIC_NAMES = ['homogeneity', 'completeness', 'v_measure', 'ARI', 'AMI', 'silhouette']
@@ -62,14 +63,18 @@ def evaluate_k_means(data, estimators):
     return df
 
 
-def estimate_n_clusters(data, maximum_clusters):
-    dfs = []
-    for n in range(2, maximum_clusters + 1):
-        estimator = KMeans(init='k-means++', n_clusters=n, n_init=10)
-        df = bench_k_means(estimator=estimator, name='kmeans++', data=data, sample_size=300)
-        df['cluster'] = n
-        dfs.append(df)
-    return pd.concat(dfs).reset_index().set_index(['metric', 'clusters'])
+def estimate_clusters(data):
+    features, weights, labels = data
+    scores = []
+    estimator = KMeans()
+    n_clusters = features.shape[1]
+    for n in range(1, n_clusters):
+        estimator.n_clusters = n
+        score = np.mean(cross_val_score(estimator, features))
+        scores.append([n, score])
+    df = pd.DataFrame.from_records(scores, columns=['clusters', 'score'])
+    df['algo'] = 'kmeans'
+    return df
 
 """
 

@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import metrics
 from sklearn import mixture
+from sklearn.cross_validation import cross_val_score
 
 higgs_estimators = {'gmm_higgs_2': mixture.GMM(n_components=2),
                     'gmm_higgs_8': mixture.GMM(n_components=8)}
@@ -32,4 +33,18 @@ def evaluate_gmm(data, estimators):
                                                        metric=metrics.v_measure_score)
         records.append([name, score, elapsed_time])
     df = pd.DataFrame.from_records(records, columns=['estimator', 'v-measure', 'time'])
+    return df
+
+
+def estimate_clusters(data):
+    features, weights, labels = data
+    scores = []
+    estimator = mixture.GMM()
+    n_clusters = features.shape[1]
+    for n in range(1, n_clusters):
+        estimator.n_clusters = n
+        score = np.mean(cross_val_score(estimator, features))
+        scores.append([n, score])
+    df = pd.DataFrame.from_records(scores, columns=['clusters', 'score'])
+    df['algo'] = 'gmm'
     return df

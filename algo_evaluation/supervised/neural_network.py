@@ -23,7 +23,9 @@ sns.set_context(rc={'lines.markeredgewidth': 0.1})
 
 class NeuralNetwork:
     def __init__(self, data, learning_rate=0.1, momentum=0.1, n_hidden_units=5):
-        self.features, self.weights, labels = data
+        self.features = data['features']
+        self.weights = data['weights']
+        labels = data['labels']
         self.features = scale_features(self.features)
         self.labels = np.array([1 if l == 's' else 0 for l in labels])
         self.learning_rate = learning_rate

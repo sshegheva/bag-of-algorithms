@@ -26,5 +26,18 @@ def rank_features(data, n_estimators=250, display=False):
     return df
 
 
+def transform(data, n_components=3):
+    features, weights, labels = data
+    feature_names = features.columns.tolist()
+    start = time()
+    forest = ExtraTreesClassifier(random_state=0)
+    forest.fit(features, labels)
+    elapsed = time() - start
+    importances = forest.feature_importances_
+    importances = zip(feature_names, importances)
+    importances = sorted(importances, key=lambda x: x[1], reverse=True)
+    df = features[[f for f, _ in importances[:n_components]]]
+    return df, elapsed
+
 def plot_rank(df):
     df['rank'].plot(kind='bar', title='Higgs Feature Rank (largest information gain)', figsize=(10, 4))

@@ -80,7 +80,8 @@ def load_higgs_train(sample_size=None, verbose=True, scale=False, prune_features
     weights = df['Weight']
     labels = df['Label']
     if scale:
-        features = preprocessing.scale(features)
+        scaled_features = preprocessing.scale(features)
+        features = pd.DataFrame(scaled_features, columns=features.columns)
     if verbose:
         print 'Size of the dataset:', features.shape[0]
         print 'Number of features:', features.shape[1]

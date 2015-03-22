@@ -5,7 +5,6 @@ from time import time
 import numpy as np
 import pandas as pd
 from sklearn import random_projection
-from sklearn.cross_validation import cross_val_score
 
 
 def rank_features(data, n_components, display=False):
@@ -36,15 +35,22 @@ def transform(data, n_components=3):
     return df, elapsed
 
 
+def reconstruction_error(estimator, features):
+    transformed = estimator.fit_transform(features)
+    reconstruct = estimator.inverse_transform(transformed)
+    residual = np.linalg.norm(reconstruct - features)
+    return np.sqrt(residual)
+
+
 def estimate_components(data):
     features, weights, labels = data
     n_components = features.shape[1]
     estimator = random_projection.SparseRandomProjection()
-    pca_scores = []
-    for n in range(n_components):
+    scores = []
+    for n in range(1, n_components):
         estimator.n_components = n
-        score = np.mean(cross_val_score(estimator, features))
-        pca_scores.append([n, score])
-    df = pd.DataFrame.from_records(pca_scores, columns=['components', 'score'])
+        score = reconstruction_error(estimator, features)
+        scores.append([n, score])
+    df = pd.DataFrame.from_records(scores, columns=['components', 'reconstruction_error'])
     df['algo'] = 'rand_projections'
     return df

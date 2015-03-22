@@ -1,21 +1,21 @@
 """
-http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html
+http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FactorAnalysis.html#sklearn.decomposition.FactorAnalysis
 """
 import numpy as np
 import pandas as pd
 from time import time
-from sklearn.decomposition import FastICA
-from sklearn.cross_validation import cross_val_score
+from sklearn.decomposition import TruncatedSVD
 
 
 def transform(data, n_components=3):
     features, weights, labels = data
     start = time()
-    ica = FastICA(n_components=n_components)
+    ica = TruncatedSVD(n_components=n_components)
     transformed = ica.fit_transform(features)
     elapsed = time() - start
     df = pd.DataFrame(transformed)
     return df, elapsed
+
 
 def reconstruction_error(estimator, features):
     transformed = estimator.fit_transform(features)
@@ -27,13 +27,13 @@ def reconstruction_error(estimator, features):
 def estimate_components(data):
     features, weights, labels = data
     n_components = features.shape[1]
-    estimator = FastICA(max_iter=500)
+    estimator = TruncatedSVD()
     scores = []
     for n in range(1, n_components):
         estimator.n_components = n
         score = reconstruction_error(estimator, features)
         scores.append([n, score])
     df = pd.DataFrame.from_records(scores, columns=['components', 'reconstruction_error'])
-    df['algo'] = 'fast_ica'
+    df['algo'] = 'lsa'
     return df
 

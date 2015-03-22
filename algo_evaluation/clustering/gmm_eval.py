@@ -43,7 +43,7 @@ def estimate_clusters(data):
     n_clusters = features.shape[1]
     for n in range(1, n_clusters):
         estimator.n_clusters = n
-        score = np.mean(cross_val_score(estimator, features))
+        score = np.mean(cross_val_score(estimator, features, labels, scoring='adjusted_rand_score'))
         scores.append([n, score])
     df = pd.DataFrame.from_records(scores, columns=['clusters', 'score'])
     df['algo'] = 'gmm'

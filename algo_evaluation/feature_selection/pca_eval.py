@@ -42,16 +42,23 @@ def transform(data, n_components=3):
     return df, elapsed
 
 
+def reconstruction_error(estimator, features):
+    transformed = estimator.fit_transform(features)
+    reconstruct = estimator.inverse_transform(transformed)
+    residual = (reconstruct - features) * (reconstruct - features)
+    return residual
+
+
 def estimate_components(data):
     features, weights, labels = data
     n_components = features.shape[1]
-    pca = PCA()
-    pca_scores = []
+    estimator = PCA()
+    scores = []
     for n in range(n_components):
-        pca.n_components = n
-        score = np.mean(cross_val_score(pca, features))
-        pca_scores.append([n, score])
-    df = pd.DataFrame.from_records(pca_scores, columns=['components', 'score'])
+        estimator.n_components = n
+        score = np.mean(cross_val_score(estimator, features))
+        scores.append([n, score])
+    df = pd.DataFrame.from_records(scores, columns=['components', 'score'])
     df['algo'] = 'pca'
     return df
 

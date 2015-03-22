@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction import DictVectorizer
 from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT
 from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde
 
@@ -102,22 +103,39 @@ def load_higgs_test():
     return df
 
 
-def load_bidding_train(verbose=True):
+def _categorical_feature_transform(df, categorical_features):
+    def transform_feature(df, feature):
+        feature_dict = [{feature: n} for n in df[feature]]
+        vec = DictVectorizer()
+        new_features = vec.fit_transform(feature_dict).toarray()
+        new_features = pd.DataFrame(new_features, columns=vec.get_feature_names())
+        df.reset_index(inplace=True)
+        df = pd.concat([df, new_features], axis=1)
+        return df.drop(feature, axis=1)
+    for feature in categorical_features:
+        df = transform_feature(df, feature)
+    return df
+
+
+def load_bidding_train(verbose=True, scale=False):
     df = pd.read_csv(BIDDING_DATA['training'], low_memory=False).dropna()
-    features = df[df.columns.tolist()[:-1]]
+    feature_columns = df.columns.tolist()[:-1]
     le = LabelEncoder()
-    transformed = [le.fit_transform(features[f]) for f in features.columns]
-    transformed_df = pd.DataFrame.from_records(transformed).transpose()
+    transformed = [le.fit_transform(df[f]) for f in feature_columns]
+    features_df = pd.DataFrame.from_records(transformed).transpose()
     labels = df['class']
     weights = np.ones(len(labels))
     if verbose:
-        print 'Size of the dataset:', transformed_df.shape[0]
-        print 'Number of features:', transformed_df.shape[1]
+        print 'Size of the dataset:', features_df.shape[0]
+        print 'Number of features:', features_df.shape[1]
         print 'Number of converters:', labels.value_counts()['converter']
         print 'Number of non-converters:', labels.value_counts()['non-converter']
         print 'Number of leads:', labels.value_counts()['lead']
+    if scale:
+        scaled_features = preprocessing.scale(features_df)
+        features_df = pd.DataFrame(scaled_features, columns=feature_columns)
 
-    return transformed_df, weights, labels
+    return features_df, weights, labels
 
 
 def load_bidding_test():

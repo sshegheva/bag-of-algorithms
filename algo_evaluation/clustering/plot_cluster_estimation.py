@@ -1,14 +1,12 @@
 import matplotlib.pyplot as plt
 
 
-def plot_cluster_score(rhc_df, sa_df, ga_df, mm_df):
-    f, ax = plt.subplots(2, 2, figsize=(10, 8))
-    rhc_df['optimal_value'].plot(title='Hill Climber', ax=ax[0][0], legend=False, sharex=False)
-    ax[0][0].set_ylabel("optimal value")
-    sa_df['optimal_value'].plot(title='Simulated Annealing', logx=True, ax=ax[0][1], legend=False, sharex=False)
-    ax[0][1].set_ylabel("optimal value")
-    ga_df['optimal_value'].plot(title='Genetic Algorithm', ax=ax[1][0], legend=False, sharex=False)
-    ax[1][0].set_ylabel("optimal value")
-    mm_df.groupby('iteration').max()['optimal_value'].plot(title='MIMIC', ax=ax[1][1], legend=False, sharex=False)
-    ax[1][1].set_ylabel("optimal value")
+def plot_cluster_score(higgs_cluster_df, bid_cluster_df):
+    f, ax = plt.subplots(1, 2, figsize=(10, 4))
+    higgs_cluster_df['score'].plot(title='Higgs Clustering (ARI)', ax=ax[0], legend=False, sharex=False)
+    ax[0].set_ylabel("ARI")
+    ax[0].set_xlabel("clusters")
+    bid_cluster_df['score'].plot(title='Converters Clustering (ARI)', ax=ax[1], legend=False, sharex=False)
+    ax[1].set_ylabel("ARI")
+    ax[1].set_xlabel("clusters")
     plt.tight_layout()

@@ -27,8 +27,8 @@ def rank_features(data, n_components, display=False):
     return df
 
 
-def plot_rank(df):
-    df['variance_ratio'].plot(kind='bar', title='Higgs Feature Rank (largest variance ratio)', figsize=(10, 4))
+def plot_rank(df, title, figsize=(10, 4)):
+    df['variance_ratio'].plot(kind='bar', title=title, figsize=figsize)
 
 
 def transform(data, n_components=3):

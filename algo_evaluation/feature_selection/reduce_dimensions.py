@@ -9,7 +9,7 @@ def run_higg_dimensionality_reduction(higgs_data, n_components):
     ica_trns, ica_elapsed = ica_eval.transform(higgs_data, n_components=n_components)
     lsa_trns, lsa_elapsed = trunk_svd.transform(higgs_data, n_components=n_components)
     transformation_time = pd.Series([pca_elapsed, rand_proj_elapsed, ica_elapsed, lsa_elapsed],
-                                    index=['PCA', 'RP', 'ICA', 'LSA'],
+                                    index=['PCA', 'RCA', 'ICA', 'LSA'],
                                     name='transformation_time')
     return {'pca': pca_trns, 'rand_proj': rand_projections, 'ica': ica_trns, 'lsa': lsa_trns}, transformation_time
 
@@ -20,7 +20,7 @@ def run_converters_dimensionality_reduction(conv_data, n_components):
     ica_trns, ica_elapsed = ica_eval.transform(conv_data, n_components=n_components)
     lsa_trns, lsa_elapsed = trunk_svd.transform(conv_data, n_components=n_components)
     transformation_time = pd.Series([pca_elapsed, rand_proj_elapsed, ica_elapsed, lsa_elapsed],
-                                    index=['PCA', 'RP', 'ICA', 'LSA'],
+                                    index=['PCA', 'RCA', 'ICA', 'LSA'],
                                     name='transformation_time')
     return {'pca': pca_trns, 'rand_proj': rand_projections, 'ica': ica_trns, 'lsa': lsa_trns}, transformation_time
 

@@ -43,8 +43,8 @@ Any other feature selection algorithm you desire
 You are to run a number of experiments. Come up with at least two datasets.
 If you'd like (and it makes a lot of sense in this case) you can use the ones you used in the first assignment.
 
-Run the clustering algorithms on the data sets and describe what you see.
-Apply the dimensionality reduction algorithms to the two datasets and describe what you see.
+DONE: Run the clustering algorithms on the data sets and describe what you see.
+DONE: Apply the dimensionality reduction algorithms to the two datasets and describe what you see.
 Reproduce your clustering experiments, but on the data after you've run dimensionality reduction on it.
 Apply the dimensionality reduction algorithms to one of your datasets from assignment #1
 (if you've reused the datasets from assignment #1 to do experiments 1-3 above then you've already done this)

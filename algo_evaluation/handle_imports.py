@@ -3,6 +3,8 @@ from algo_evaluation import datasets
 from algo_evaluation.clustering import kmeans_eval
 from algo_evaluation.clustering import plot_cluster_estimation
 from algo_evaluation.clustering import gmm_eval
+from algo_evaluation.clustering import clustering_dim_reduction
+reload(clustering_dim_reduction)
 
 from algo_evaluation.feature_selection import pca_eval
 from algo_evaluation.feature_selection import rand_projections

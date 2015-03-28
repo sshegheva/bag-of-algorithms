@@ -64,8 +64,7 @@ def evaluate_k_means(data, estimators):
 
 
 def estimate_clusters(data):
-    features = data['features']
-    labels = data['labels']
+    features, _, labels = data
     scores = []
     estimator = KMeans()
     n_clusters = features.shape[1]

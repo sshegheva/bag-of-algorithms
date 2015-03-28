@@ -37,7 +37,7 @@ def evaluate_gmm(data, estimators):
 
 
 def estimate_clusters(data):
-    features = data['features']
+    features, _, _ = data
     scores = []
     estimator = mixture.GMM()
     n_clusters = features.shape[1]

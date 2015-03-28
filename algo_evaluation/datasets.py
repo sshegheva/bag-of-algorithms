@@ -21,7 +21,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.feature_extraction import DictVectorizer
 from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT
 from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde
@@ -106,10 +106,10 @@ def load_higgs_test():
 def _categorical_feature_transform(df, categorical_features):
     def transform_feature(df, feature):
         feature_dict = [{feature: n} for n in df[feature]]
-        vec = DictVectorizer()
-        new_features = vec.fit_transform(feature_dict).toarray()
+        vec = DictVectorizer(sparse=False)
+        new_features = vec.fit_transform(feature_dict)
         new_features = pd.DataFrame(new_features, columns=vec.get_feature_names())
-        df.reset_index(inplace=True)
+        #df.reset_index(inplace=True)
         df = pd.concat([df, new_features], axis=1)
         return df.drop(feature, axis=1)
     for feature in categorical_features:
@@ -119,10 +119,15 @@ def _categorical_feature_transform(df, categorical_features):
 
 def load_bidding_train(verbose=True, scale=False):
     df = pd.read_csv(BIDDING_DATA['training'], low_memory=False).dropna()
+    categorical_features = ['os', 'browser', 'country', 'region', 'user_local_hour']
+    #cols_to_drop = ['user_id', 'ipaddress', 'source_timestamp', 'creative_uid', 'sitename']
+    #df.drop(cols_to_drop, axis=1, inplace=True)
     feature_columns = df.columns.tolist()[:-1]
     le = LabelEncoder()
     transformed = [le.fit_transform(df[f]) for f in feature_columns]
-    features_df = pd.DataFrame.from_records(transformed).transpose()
+    #transformed = _categorical_feature_transform(df[feature_columns], categorical_features)
+    #transformed = df[feature_columns]
+    features_df = pd.DataFrame.from_records(transformed).T.astype(float)
     labels = df['class']
     weights = np.ones(len(labels))
     if verbose:
@@ -132,7 +137,7 @@ def load_bidding_train(verbose=True, scale=False):
         print 'Number of non-converters:', labels.value_counts()['non-converter']
         print 'Number of leads:', labels.value_counts()['lead']
     if scale:
-        scaled_features = preprocessing.scale(features_df)
+        scaled_features = preprocessing.StandardScaler().fit_transform(features_df)
         features_df = pd.DataFrame(scaled_features, columns=feature_columns)
 
     return features_df, weights, labels

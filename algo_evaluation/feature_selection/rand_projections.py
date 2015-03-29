@@ -1,27 +1,17 @@
-"""
-http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.RandomizedPCA.html
-"""
 from time import time
 import numpy as np
 import pandas as pd
 from sklearn import random_projection
 
 
-def rank_features(data, n_components, display=False):
+def project_features(data, n_components, display=False):
     features, weights, labels = data
     feature_names = features.columns.tolist()
     start = time()
     rp = random_projection.SparseRandomProjection(n_components=n_components)
     rp.fit(features)
-    elapsed = time() - start
-    variances = rp.explained_variance_
-    variances = zip(feature_names, variances)
-    df = pd.DataFrame(variances, columns=['feature', 'variance']).set_index('feature').sort('variance', ascending=False)
-    df['time'] = elapsed
-    df['algo'] = 'pca_rand'
-    if display:
-        df.plot(kind='bar', title='Higgs Feature Variance', figsize=(10, 4))
-    return df
+    rp.transform(features)
+    return rp
 
 
 def transform(data, n_components=3):

@@ -3,11 +3,14 @@ Reproduce your clustering experiments,
 but on the data after you've run dimensionality reduction on it.
 """
 import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn import mixture
+from algo_evaluation.feature_selection import pca_eval
 from algo_evaluation.feature_selection import reduce_dimensions
 from algo_evaluation.clustering import kmeans_eval
 from algo_evaluation.clustering import plot_cluster_estimation
 from algo_evaluation.clustering import gmm_eval
-reload(reduce_dimensions)
+from algo_evaluation.supervised.neural_network import run_neural_net
 
 
 def reduce_higgs(higgs_data, n_components):
@@ -55,6 +58,23 @@ def evaluate_conv_clustering(bid_data, n_components):
     df = pd.concat(dfs)
     return df
 
+
+def kmeans_transform(higgs_data, n_clusters, n_components, display=False):
+    reduced_higgs_data, elapsed = pca_eval.transform(higgs_data, n_components=n_components)
+    cluster_data = KMeans(n_clusters=n_clusters).fit_transform(reduced_higgs_data)
+    data = {'features': cluster_data, 'weights': higgs_data[1], 'labels': higgs_data[2]}
+    if display and n_clusters == 2:
+        df = pd.DataFrame.from_records(cluster_data, columns=['new_feature_' + str(n) for n in range(n_clusters)])
+        df['label'] = higgs_data[2].values
+        ax = df[df.label == 's'].plot(x='new_feature_0', y='new_feature_1',
+                                      kind='scatter', color='darkgreen', label='signal')
+        df[df.label == 'b'].plot(x='new_feature_0', y='new_feature_1',
+                                 kind='scatter', color='darkred', ax=ax, label='background')
+    return data
+
+
+def neural_net_post_clustering(data):
+    return run_neural_net(data)
 
 def plot_cluster_performance(df_higgs, df_conv, reduction_algo='PCA'):
     df_higgs_kmeans = df_higgs.query('algo == "kmeans"').query('reduction_algo == "{}"'.format(reduction_algo))

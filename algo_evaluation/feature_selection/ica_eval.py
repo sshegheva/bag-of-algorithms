@@ -3,9 +3,10 @@ http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.h
 """
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from time import time
 from sklearn.decomposition import FastICA
-from sklearn.cross_validation import cross_val_score
+import seaborn as sns
 
 
 def transform(data, n_components=3):
@@ -16,6 +17,18 @@ def transform(data, n_components=3):
     elapsed = time() - start
     df = pd.DataFrame(transformed)
     return df, elapsed
+
+
+def mixing_matrix(data, n_components, display=True):
+    features, weights, labels = data
+    ica = FastICA(n_components=n_components)
+    ica.fit_transform(features)
+    mixing = ica.mixing_
+    if display:
+        f, ax = plt.subplots(figsize=(10, 6))
+        sns.heatmap(mixing)
+        plt.title('Signal Mixing Estimated Matrix')
+    return mixing
 
 def reconstruction_error(estimator, features):
     transformed = estimator.fit_transform(features)

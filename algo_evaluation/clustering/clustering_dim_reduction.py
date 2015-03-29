@@ -66,7 +66,9 @@ def kmeans_transform(higgs_data, n_clusters, n_components, display=False):
     reduced_higgs_data, elapsed = pca_eval.transform(higgs_data, n_components=n_components)
     cluster_data = KMeans(n_clusters=n_clusters).fit_transform(reduced_higgs_data)
     elapsed = time() - start
-    data = {'features': cluster_data, 'weights': higgs_data[1], 'labels': higgs_data[2]}
+    for l in range(cluster_data.shape[1]):
+        reduced_higgs_data['new_feature' + str(l)] = cluster_data[:, l]
+    data = {'features': reduced_higgs_data, 'weights': higgs_data[1], 'labels': higgs_data[2]}
     if display and n_clusters == 2:
         df = pd.DataFrame.from_records(cluster_data, columns=['new_feature_' + str(n) for n in range(n_clusters)])
         df['label'] = higgs_data[2].values
@@ -74,6 +76,16 @@ def kmeans_transform(higgs_data, n_clusters, n_components, display=False):
                                       kind='scatter', color='darkgreen', label='signal')
         df[df.label == 'b'].plot(x='new_feature_0', y='new_feature_1',
                                  kind='scatter', color='darkred', ax=ax, label='background')
+    return data, elapsed
+
+
+def gmm_transform(higgs_data, n_clusters, n_components):
+    start = time()
+    reduced_higgs_data, elapsed = pca_eval.transform(higgs_data, n_components=n_components)
+    cluster_assignment = mixture.GMM(n_components=n_clusters).fit(reduced_higgs_data).predict(reduced_higgs_data)
+    elapsed = time() - start
+    reduced_higgs_data['cluster_assighment'] = cluster_assignment
+    data = {'features': reduced_higgs_data, 'weights': higgs_data[1], 'labels': higgs_data[2]}
     return data, elapsed
 
 

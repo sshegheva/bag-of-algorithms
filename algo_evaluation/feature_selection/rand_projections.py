@@ -37,7 +37,7 @@ def reconstruction_error(estimator, features):
 def estimate_components(data):
     features, weights, labels = data
     n_components = features.shape[1]
-    dt = DecisionTree(data, min_samples_split=60)
+    dt = DecisionTree(data)
     train_features = dt.dataset['training']['features']
     test_features = dt.dataset['test']['features']
     dt.clf.fit(train_features, dt.dataset['training']['labels'])

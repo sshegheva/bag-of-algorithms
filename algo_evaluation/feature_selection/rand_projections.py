@@ -2,6 +2,8 @@ from time import time
 import numpy as np
 import pandas as pd
 from sklearn import random_projection
+from sklearn.random_projection import johnson_lindenstrauss_min_dim
+from algo_evaluation.supervised.decision_tree import DecisionTree
 
 
 def project_features(data, n_components, display=False):
@@ -35,12 +37,24 @@ def reconstruction_error(estimator, features):
 def estimate_components(data):
     features, weights, labels = data
     n_components = features.shape[1]
-    estimator = random_projection.SparseRandomProjection()
+    dt = DecisionTree(data, min_samples_split=60)
+    train_features = dt.dataset['training']['features']
+    test_features = dt.dataset['test']['features']
+    dt.clf.fit(train_features, dt.dataset['training']['labels'])
+    baseline_accuracy = dt.clf.score(test_features, dt.dataset['test']['labels'],
+                                sample_weight=dt.dataset['test']['weights'])
     scores = []
-    for n in range(1, n_components):
-        estimator.n_components = n
-        score = reconstruction_error(estimator, features)
-        scores.append([n, score])
-    df = pd.DataFrame.from_records(scores, columns=['components', 'reconstruction_error'])
-    df['algo'] = 'rand_projections'
+    for component in range(1, n_components):
+        estimator = random_projection.SparseRandomProjection()
+        estimator.n_components = component
+        transformed_train_features = estimator.fit(train_features).transform(train_features)
+        transformed_test_features = estimator.transform(test_features)
+        dt.clf.fit(transformed_train_features, dt.dataset['training']['labels'])
+        accuracy = dt.clf.score(transformed_test_features, dt.dataset['test']['labels'],
+                                sample_weight=dt.dataset['test']['weights'])
+        error = 1 - accuracy
+        scores.append([component, accuracy, error])
+    df = pd.DataFrame.from_records(scores,
+                                   columns=['components', 'classification_accuracy', 'classification_error'])
+    df['baseline'] = 1 - baseline_accuracy
     return df

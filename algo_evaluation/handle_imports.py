@@ -9,5 +9,6 @@ from algo_evaluation.feature_selection import pca_eval
 from algo_evaluation.feature_selection import rand_projections
 reload(rand_projections)
 from algo_evaluation.feature_selection import ica_eval
+reload(ica_eval)
 
 from algo_evaluation.supervised import neural_network_dim_reduction as nn

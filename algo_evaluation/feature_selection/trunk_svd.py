@@ -7,6 +7,25 @@ from time import time
 from sklearn.decomposition import TruncatedSVD
 
 
+def rank_features(data, n_components, display=False):
+    features, weights, labels = data
+    feature_names = features.columns.tolist()
+    start = time()
+    pca = TruncatedSVD(n_components=n_components)
+    pca.fit(features)
+    elapsed = time() - start
+    variances = pca.explained_variance_ratio_
+    variances = zip(feature_names, variances)
+    df = pd.DataFrame(variances, columns=['feature', 'variance_ratio']).set_index('feature')
+    df = df.sort('variance_ratio', ascending=False)
+    df['time'] = elapsed
+    df['algo'] = 'pca'
+    if display:
+        df['variance_ratio'].plot(kind='bar',
+                                  title='Trunkated SVD Component Selection (variance ratio)',
+                                  figsize=(12, 4))
+    return df
+
 def transform(data, n_components=3):
     features, weights, labels = data
     start = time()

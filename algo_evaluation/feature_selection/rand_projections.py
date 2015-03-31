@@ -47,10 +47,10 @@ def estimate_components(data, iterations=10):
                                 sample_weight=dataset['test']['weights'])
     scores = []
     for component in range(1, n_components):
+        estimator = random_projection.SparseRandomProjection()
+        estimator.n_components = component
         for iter in range(1, iterations):
-            estimator = random_projection.SparseRandomProjection()
-            estimator.n_components = component
-            transformed_train_features = estimator.fit(train_features).transform(train_features)
+            transformed_train_features = estimator.fit_transform(train_features)
             transformed_test_features = estimator.transform(test_features)
             baseline_estimator.fit(transformed_train_features, dataset['training']['labels'])
             accuracy = baseline_estimator.score(transformed_test_features, dataset['test']['labels'],

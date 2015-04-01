@@ -11,10 +11,11 @@ def rank_features(data, n_components, display=False):
     features, weights, labels = data
     feature_names = features.columns.tolist()
     start = time()
-    pca = TruncatedSVD(n_components=n_components)
-    pca.fit(features)
+    estimator = TruncatedSVD(n_components=n_components, algorithm='arpack')
+    print estimator
+    estimator.fit(features)
     elapsed = time() - start
-    variances = pca.explained_variance_ratio_
+    variances = estimator.explained_variance_ratio_
     variances = zip(feature_names, variances)
     df = pd.DataFrame(variances, columns=['feature', 'variance_ratio']).set_index('feature')
     df = df.sort('variance_ratio', ascending=False)

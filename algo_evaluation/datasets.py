@@ -21,7 +21,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.feature_extraction import DictVectorizer
 from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT
 from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde
 
@@ -58,7 +59,7 @@ def describe_higgs_raw():
     return df
 
 
-def load_higgs_train(sample_size=None, verbose=True):
+def load_higgs_train(sample_size=None, verbose=True, scale=False, prune_features=True):
     """
     Load higgs dataset
 
@@ -71,11 +72,17 @@ def load_higgs_train(sample_size=None, verbose=True):
     df = df.replace(-999.000, np.nan).dropna()
     df.set_index('EventId', inplace=True)
     columns = df.columns
-    derived_features_names = [f for f in columns if f.startswith('DER')]
-    derived_df = df[derived_features_names]
-    features = derived_df[derived_features_names]
+    if prune_features:
+        derived_features_names = [f for f in columns if f.startswith('DER')]
+        derived_df = df[derived_features_names]
+        features = derived_df[derived_features_names]
+    else:
+        features = df[columns[:-2]]
     weights = df['Weight']
     labels = df['Label']
+    if scale:
+        scaled_features = preprocessing.scale(features)
+        features = pd.DataFrame(scaled_features, columns=features.columns)
     if verbose:
         print 'Size of the dataset:', features.shape[0]
         print 'Number of features:', features.shape[1]
@@ -84,7 +91,7 @@ def load_higgs_train(sample_size=None, verbose=True):
     return features, weights, labels
 
 
-def normalize_features(features):
+def scale_features(features):
     #normalized_features = preprocessing.normalize(features)
     standardized_features = preprocessing.scale(features)
     return standardized_features
@@ -96,15 +103,44 @@ def load_higgs_test():
     return df
 
 
-def load_bidding_train():
+def _categorical_feature_transform(df, categorical_features):
+    def transform_feature(df, feature):
+        feature_dict = [{feature: n} for n in df[feature]]
+        vec = DictVectorizer(sparse=False)
+        new_features = vec.fit_transform(feature_dict)
+        new_features = pd.DataFrame(new_features, columns=vec.get_feature_names())
+        #df.reset_index(inplace=True)
+        df = pd.concat([df, new_features], axis=1)
+        return df.drop(feature, axis=1)
+    for feature in categorical_features:
+        df = transform_feature(df, feature)
+    return df
+
+
+def load_bidding_train(verbose=True, scale=False):
     df = pd.read_csv(BIDDING_DATA['training'], low_memory=False).dropna()
-    features = df[df.columns.tolist()[:-1]]
+    categorical_features = ['os', 'browser', 'country', 'region', 'user_local_hour']
+    #cols_to_drop = ['user_id', 'ipaddress', 'source_timestamp', 'creative_uid', 'sitename']
+    #df.drop(cols_to_drop, axis=1, inplace=True)
+    feature_columns = df.columns.tolist()[:-1]
     le = LabelEncoder()
-    transformed = [le.fit_transform(features[f]) for f in features.columns]
-    transformed_df = pd.DataFrame.from_records(transformed).transpose()
+    transformed = [le.fit_transform(df[f]) for f in feature_columns]
+    #transformed = _categorical_feature_transform(df[feature_columns], categorical_features)
+    #transformed = df[feature_columns]
+    features_df = pd.DataFrame.from_records(transformed).T.astype(float)
     labels = df['class']
     weights = np.ones(len(labels))
-    return transformed_df, weights, labels
+    if verbose:
+        print 'Size of the dataset:', features_df.shape[0]
+        print 'Number of features:', features_df.shape[1]
+        print 'Number of converters:', labels.value_counts()['converter']
+        print 'Number of non-converters:', labels.value_counts()['non-converter']
+        print 'Number of leads:', labels.value_counts()['lead']
+    if scale:
+        scaled_features = preprocessing.StandardScaler().fit_transform(features_df)
+        features_df = pd.DataFrame(scaled_features, columns=feature_columns)
+
+    return features_df, weights, labels
 
 
 def load_bidding_test():

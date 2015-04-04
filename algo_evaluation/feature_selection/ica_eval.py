@@ -38,12 +38,12 @@ def reconstruction_error(estimator, features):
     return np.sqrt(residual)
 
 
-def estimate_components(data, display=True):
+def estimate_components(data, display=True, figsize=(12, 4)):
     features, weights, labels = data
     feature_names = features.columns.tolist()
     data = [kurtosis(features[f]) for f in feature_names]
     df = pd.Series(data, index=feature_names).order(ascending=False)
     if display:
-        df.plot(kind='bar', title='ICA Component Selection (kurtosis)', figsize=(12, 4))
+        df.plot(kind='bar', title='ICA Component Selection (kurtosis)', figsize=figsize)
     return df
 

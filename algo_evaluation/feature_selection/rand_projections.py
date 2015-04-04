@@ -68,5 +68,5 @@ def estimate_components(data, iterations=10):
     return df
 
 def plot_component_estimation(df):
-    sns.lmplot("components", "classification_accuracy", hue="iteration", data=df, size=6, order=1)
+    sns.lmplot("components", "classification_accuracy", hue="iteration", data=df, size=4, order=1)
     plt.title('Randomized Projections Component Estimation')

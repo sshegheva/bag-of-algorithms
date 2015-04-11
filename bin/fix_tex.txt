@@ -1,2 +1,5 @@
     \usepackage{setspace}
     \onehalfspacing
+
+
+    \author{Snejana Shegheva}

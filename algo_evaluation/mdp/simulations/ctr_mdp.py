@@ -93,7 +93,9 @@ def evaluate_best_policy_choice(df, rewards):
         series.append(s)
     df = pd.concat([R] + series, axis=1)
     df.rename(columns={0: 'ctr'}, inplace=True)
-    return df.sort('ctr', ascending=False).set_index('ctr')
+    df = df.sort('ctr', ascending=False).set_index('ctr')
+    df['total'] = df.apply(lambda x: sum([1 if i == '!!!' else 0 for i in x]), axis=1)
+    return df
 
 
 def test_discount_factor(transitions, rewards, discount_factor_range=(0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 0.99), num_sim=50):

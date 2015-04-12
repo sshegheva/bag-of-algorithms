@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
 from mdptoolbox.mdp import QLearning
 
 
@@ -42,3 +42,17 @@ def test_algorithm(algorithm, P, R, discount, num_sim=10000):
         series.append(d)
     df = pd.concat(series, axis=1)
     return df.T
+
+
+def plot_qlearn_performance(forest_df, ctr_df):
+    f, ax = plt.subplots(1, 2, figsize=(12, 4))
+    forest_df.groupby('algorithm').time.plot(ax=ax[0], legend=True, title='Algorithm Running Time')
+    ax[0].set_xlabel('iterations')
+    ax[0].set_ylabel('time (ms)')
+    forest_discrepancy = pd.Series(forest_df[forest_df['algorithm'] == 'QLearning'].loc[0]['mean_discrepancy'])
+    ctr_dicrepancy = pd.Series(ctr_df.loc[0]['mean_discrepancy'])
+    disrepancy_df = pd.concat([forest_discrepancy, ctr_dicrepancy], axis=1)
+    disrepancy_df.rename(columns={0: 'forest', 1: 'ctr'}, inplace=True)
+    disrepancy_df.plot(ax=ax[1], legend=True, title='Q Matrix mean discrepancy')
+    ax[1].set_xlabel('iterations')
+    ax[1].set_ylabel('variation')

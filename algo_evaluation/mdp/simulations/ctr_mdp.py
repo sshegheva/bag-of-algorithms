@@ -9,7 +9,7 @@ from mdptoolbox.mdp import ValueIteration
 from mdptoolbox.mdp import PolicyIteration
 from mdptoolbox.mdp import QLearning
 
-from algo_evaluation.mdp.simulations.solve_mdp import test_algorithm, solve_mdp_by_iteration
+from algo_evaluation.mdp.simulations import solve_mdp
 
 warnings.filterwarnings("ignore")
 
@@ -61,21 +61,48 @@ def create_ctr_mdp(n_ads=20, mu=10, n_simulations=10000):
     return P, R
 
 
-def solve_ctr_mdp(n_ads=20, mu=10, num_simulations=1000, discount=0.99):
-    P, R = create_ctr_mdp(n_ads=n_ads, mu=mu)
-    vi = test_algorithm(ValueIteration, P, R, discount=discount, num_sim=num_simulations)
-    pi = test_algorithm(PolicyIteration, P, R, discount=discount, num_sim=num_simulations)
+def solve_ctr_mdp(transitions, rewards, num_simulations=1000, discount=0.99):
+    P, R = transitions, rewards
+    vi = solve_mdp.test_algorithm(ValueIteration, P, R, discount=discount, num_sim=num_simulations)
+    pi = solve_mdp.test_algorithm(PolicyIteration, P, R, discount=discount, num_sim=num_simulations)
     df = pd.concat([vi, pi])
     return df
 
 
-def test_discount_factor(n_ads=20, mu=10, discount_factor_range=(0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 0.99), num_sim=50):
+def test_qlearning_algorithm(transitions, rewards,
+                             discount=0.9,
+                             num_sim_range=(10000, 10050),
+                             verbose=False):
+    P, R = transitions, rewards
+    min_value, max_value = num_sim_range
+    series = []
+    for n in range(min_value, max_value):
+        s = solve_mdp.solve_mdp_by_qlearning(P, R, discount=discount, max_iter=n, verbose=verbose)
+        series.append(s)
+    df = pd.concat(series, axis=1)
+    return df.T
+
+
+def evaluate_best_policy_choice(df, rewards):
+    R = pd.Series(rewards[0, :])
+    series = []
+    for pol in df.policy:
+        s = pd.Series(['' for n in range(len(R))])
+        idx = pol[0]
+        s[idx] = '!!!'
+        series.append(s)
+    df = pd.concat([R] + series, axis=1)
+    df.rename(columns={0: 'ctr'}, inplace=True)
+    return df.sort('ctr', ascending=False).set_index('ctr')
+
+
+def test_discount_factor(transitions, rewards, discount_factor_range=(0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 0.99), num_sim=50):
     dfs = []
+    P, R = transitions, rewards
     for factor in discount_factor_range:
         series = []
         for n in range(1, num_sim):
-            P, R = create_ctr_mdp(n_ads=n_ads, mu=mu)
-            vi = solve_mdp_by_iteration(ValueIteration, P, R, discount=factor, max_iter=n)
+            vi = solve_mdp.solve_mdp_by_iteration(ValueIteration, P, R, discount=factor, max_iter=n)
             series.append(vi)
         df = pd.concat(series, axis=1).T
         dfs.append(df)

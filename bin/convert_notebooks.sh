@@ -7,5 +7,5 @@ cd analysis/notebooks
 #ipython nbconvert --to latex "Unsupervised Learning and Dimensionality Reduction.ipynb"
 #pdflatex "Unsupervised Learning and Dimensionality Reduction.tex"
 
-ipython nbconvert --to latex "Markov Decision Processess.ipynb"
-pdflatex "Markov Decision Processess.tex"
+ipython nbconvert --to latex "Markov Decision Processes.ipynb"
+pdflatex "Markov Decision Processes.tex"

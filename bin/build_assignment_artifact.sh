@@ -6,7 +6,7 @@ cd /tmp
 rm -rf /tmp/sshegheva3
 git clone https://github.com/sshegheva/bag-of-algorithms /tmp/sshegheva3
 
-cp /tmp/sshegheva3/analysis/TASK3_README.md /tmp/sshegheva3/README.md
-cp "/tmp/sshegheva3/analysis/notebooks/Unsupervised Learning and Dimensionality Reduction.pdf" "/tmp/sshegheva3/sshegheva3-analysis.pdf"
+cp /tmp/sshegheva3/analysis/TASK4_README.md /tmp/sshegheva3/README.md
+cp "/tmp/sshegheva3/analysis/notebooks/Markov Decision Processes.ipynb.pdf" "/tmp/sshegheva3/sshegheva3-analysis.pdf"
 
 tar -cvf sshegheva3.tar.gz sshegheva3

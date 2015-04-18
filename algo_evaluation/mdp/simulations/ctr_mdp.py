@@ -83,7 +83,7 @@ def test_qlearning_algorithm(transitions, rewards,
     return df.T
 
 
-def evaluate_best_policy_choice(df, rewards):
+def evaluate_best_policy_choice(df, rewards, visualize=True):
     R = pd.Series(rewards[0, :])
     series = []
     for pol in df.policy:
@@ -95,6 +95,9 @@ def evaluate_best_policy_choice(df, rewards):
     df.rename(columns={0: 'ctr'}, inplace=True)
     df = df.sort('ctr', ascending=False).set_index('ctr')
     df['total'] = df.apply(lambda x: sum([1 if i == '!!!' else 0 for i in x]), axis=1)
+    if visualize:
+        df['total'].plot(kind='bar', title="Agent's preference of ads", figsize=(6,2))
+        plt.ylabel('count')
     return df
 
 

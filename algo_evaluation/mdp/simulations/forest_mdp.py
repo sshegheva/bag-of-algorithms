@@ -116,7 +116,7 @@ def plot_time_and_states(df_times, df_states):
     df_states.groupby(['age'])['accum_values'].plot(legend=True,  ax=ax[1],
                                                     title='Accumulated value with age\nFigure 1.4')
     ax[1].set_ylabel('accumulated values')
-    ax[1].set_xlabel('forest age')
+    ax[1].set_xlabel('iterations')
 
 
 def plot_discount_factor_and_fire_probability(df_discount, df_prob):

@@ -23,7 +23,9 @@ from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.feature_extraction import DictVectorizer
-from algo_evaluation import BIDDING_DATA, HIGGS_DATA, WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT
+from algo_evaluation import BIDDING_DATA, HIGGS_DATA, \
+    WALDO_DATA, MONA_LISA_DATA, SCHEDULE_DATA, LOGGER, TEST_DATA_SPLIT, \
+    LEPTON_DATA
 from algo_evaluation.plotting.plot_waldo_data import plot_waldo_kde
 
 
@@ -199,3 +201,5 @@ def split_dataset(features, weights, labels):
     return dataset
 
 
+def load_lepton_data():
+    return pd.read_csv(LEPTON_DATA, compression='gzip')

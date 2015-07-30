@@ -23,7 +23,7 @@ def rank_features(data, n_components, display=False):
     df['time'] = elapsed
     df['algo'] = 'pca'
     if display:
-        plot_rank(df)
+        plot_rank(df, 'PCA feature importance')
     return df
 
 

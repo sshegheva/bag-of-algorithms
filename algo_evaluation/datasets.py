@@ -224,4 +224,4 @@ def load_lepton_data(sample_size=None, verbose=True, scale=False):
         print 'Number of features:', features.shape[1]
         print 'Number of positives (signal):', labels.value_counts()[1]
         print 'Number of negatives (background):', labels.value_counts()[0]
-    return df
+    return features, None, labels

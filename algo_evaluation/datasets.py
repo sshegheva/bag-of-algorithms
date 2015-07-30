@@ -201,5 +201,27 @@ def split_dataset(features, weights, labels):
     return dataset
 
 
-def load_lepton_data():
-    return pd.read_csv(LEPTON_DATA, compression='gzip')
+def load_lepton_data(sample_size=None, verbose=True, scale=False):
+    """
+    Load lepton dataset
+
+    do some data cleanup:
+    - remove data entries (anomalies) which are outside of normal range
+    - pick only derived feature
+    :return: dataframe
+    """
+    df = pd.read_csv(LEPTON_DATA, compression='gzip', nrows=sample_size)
+    df.set_index('id', inplace=True)
+    columns = df.columns.tolist()
+    columns.remove('signal')
+    features = df[columns]
+    labels = df['signal']
+    if scale:
+        scaled_features = preprocessing.scale(features)
+        features = pd.DataFrame(scaled_features, columns=features.columns)
+    if verbose:
+        print 'Size of the dataset:', features.shape[0]
+        print 'Number of features:', features.shape[1]
+        print 'Number of positives (signal):', labels.value_counts()[1]
+        print 'Number of negatives (background):', labels.value_counts()[0]
+    return df
